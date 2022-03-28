@@ -28,16 +28,18 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import top.niunaijun.blackbox.core.env.BEnvironment;
 import top.niunaijun.blackbox.BlackBoxCore;
-import top.niunaijun.blackbox.entity.pm.InstallOption;
-import top.niunaijun.blackbox.entity.pm.InstallResult;
-import top.niunaijun.blackbox.entity.pm.InstalledPackage;
-import top.niunaijun.blackbox.core.system.BProcessManager;
+import top.niunaijun.blackbox.core.GmsCore;
+import top.niunaijun.blackbox.core.env.BEnvironment;
+import top.niunaijun.blackbox.core.system.BProcessManagerService;
 import top.niunaijun.blackbox.core.system.ISystemService;
+import top.niunaijun.blackbox.core.system.ProcessRecord;
 import top.niunaijun.blackbox.core.system.user.BUserHandle;
 import top.niunaijun.blackbox.core.system.user.BUserInfo;
 import top.niunaijun.blackbox.core.system.user.BUserManagerService;
+import top.niunaijun.blackbox.entity.pm.InstallOption;
+import top.niunaijun.blackbox.entity.pm.InstallResult;
+import top.niunaijun.blackbox.entity.pm.InstalledPackage;
 import top.niunaijun.blackbox.utils.AbiUtils;
 import top.niunaijun.blackbox.utils.FileUtils;
 import top.niunaijun.blackbox.utils.Slog;
@@ -56,7 +58,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
  * 此处无Bug
  */
 public class BPackageManagerService extends IBPackageManagerService.Stub implements ISystemService {
-    public static final String TAG = "VPackageManagerService";
+    public static final String TAG = "BPackageManagerService";
     public static BPackageManagerService sService = new BPackageManagerService();
     private final Settings mSettings = new Settings();
     private final ComponentResolver mComponentResolver;
@@ -157,14 +159,15 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
         // reader
         synchronized (mPackages) {
             String pkgName = intent.getPackage();
-            if (pkgName == null) {
-                return null;
-            }
-            BPackageSettings bPackageSettings = mPackages.get(pkgName);
-            if (bPackageSettings != null) {
-                final BPackage pkg = bPackageSettings.pkg;
-                return mComponentResolver.queryServices(intent, resolvedType, flags, pkg.services,
-                        userId);
+            if (pkgName != null) {
+                BPackageSettings bPackageSettings = mPackages.get(pkgName);
+                if (bPackageSettings != null) {
+                    final BPackage pkg = bPackageSettings.pkg;
+                    return mComponentResolver.queryServices(intent, resolvedType, flags, pkg.services,
+                            userId);
+                }
+            } else {
+               return mComponentResolver.queryServices(intent, resolvedType, flags, userId);
             }
             return Collections.emptyList();
         }
@@ -215,7 +218,6 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
 
     private List<ResolveInfo> queryIntentActivities(Intent intent,
                                                     String resolvedType, int flags, int userId) {
-        final String pkgName = intent.getPackage();
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -241,13 +243,16 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
 
         // reader
         synchronized (mPackages) {
-            if (pkgName != null) {
-                return mComponentResolver.queryActivities(intent, resolvedType, flags, userId);
-            }
+            return mComponentResolver.queryActivities(intent, resolvedType, flags, userId);
         }
-        return Collections.emptyList();
     }
 
+    @Override
+    public List<ResolveInfo> queryIntentServices(
+            Intent intent, int flags, int userId) {
+        final String resolvedType = intent.resolveTypeIfNeeded(BlackBoxCore.getContext().getContentResolver());
+        return this.queryIntentServicesInternal(intent, resolvedType, flags, userId);
+    }
 
     private ActivityInfo getActivity(ComponentName component, int flags,
                                      int userId) {
@@ -398,6 +403,8 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
 //                if (filterAppAccessLPr(ps, callingUid, userId)) {
 //                    continue;
 //                }
+                if (GmsCore.isGoogleAppOrService(ps.pkg.packageName))
+                    continue;
                 ApplicationInfo ai = PackageManagerCompat.generateApplicationInfo(ps.pkg, flags,
                         ps.readUserState(userId), userId);
                 if (ai != null) {
@@ -494,8 +501,9 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
                 final BPackage pkg = bPackageSettings.pkg;
                 return mComponentResolver.queryReceivers(
                         intent, resolvedType, flags, pkg.receivers, userId);
+            } else {
+                return mComponentResolver.queryReceivers(intent, resolvedType, flags, userId);
             }
-            return Collections.emptyList();
         }
     }
 
@@ -524,28 +532,27 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
                 BPackageSettings ps = mPackages.get(packageName);
                 if (ps == null)
                     return;
-                if (ps.installOption.isFlag(InstallOption.FLAG_Xposed) && userId != BUserHandle.USER_XPOSED) {
+                if (ps.installOption.isFlag(InstallOption.FLAG_XPOSED) && userId != BUserHandle.USER_XPOSED) {
                     return;
                 }
                 if (!isInstalled(packageName, userId)) {
                     return;
                 }
                 boolean removeApp = ps.getUserState().size() <= 1;
-                BProcessManager.get().killPackageAsUser(packageName, userId);
+                BProcessManagerService.get().killPackageAsUser(packageName, userId);
                 int i = BPackageInstallerService.get().uninstallPackageAsUser(ps, removeApp, userId);
                 if (i < 0) {
                     // todo
                 }
 
                 if (removeApp) {
-                    mPackages.remove(packageName);
+                    mSettings.removePackage(packageName);
                     mComponentResolver.removeAllComponents(ps.pkg);
-                    mSettings.scanPackage();
                 } else {
                     ps.removeUser(userId);
                     ps.save();
                 }
-                onPackageUninstalled(packageName, userId);
+                onPackageUninstalled(packageName, removeApp, userId);
             }
         }
     }
@@ -557,14 +564,14 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
                 BPackageSettings ps = mPackages.get(packageName);
                 if (ps == null)
                     return;
-                BProcessManager.get().killAllByPackageName(packageName);
-                if (ps.installOption.isFlag(InstallOption.FLAG_Xposed)) {
+                BProcessManagerService.get().killAllByPackageName(packageName);
+                if (ps.installOption.isFlag(InstallOption.FLAG_XPOSED)) {
                     for (BUserInfo user : BUserManagerService.get().getAllUsers()) {
                         int i = BPackageInstallerService.get().uninstallPackageAsUser(ps, true, user.id);
                         if (i < 0) {
                             continue;
                         }
-                        onPackageUninstalled(packageName, user.id);
+                        onPackageUninstalled(packageName, true, user.id);
                     }
                 } else {
                     for (Integer userId : ps.getUserIds()) {
@@ -572,12 +579,11 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
                         if (i < 0) {
                             continue;
                         }
-                        onPackageUninstalled(packageName, userId);
+                        onPackageUninstalled(packageName, true, userId);
                     }
                 }
-                mPackages.remove(packageName);
+                mSettings.removePackage(packageName);
                 mComponentResolver.removeAllComponents(ps.pkg);
-                mSettings.scanPackage();
             }
         }
     }
@@ -587,7 +593,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
         if (!isInstalled(packageName, userId)) {
             return;
         }
-        BProcessManager.get().killPackageAsUser(packageName, userId);
+        BProcessManagerService.get().killPackageAsUser(packageName, userId);
         BPackageSettings ps = mPackages.get(packageName);
         if (ps == null)
             return;
@@ -596,7 +602,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
 
     @Override
     public void stopPackage(String packageName, int userId) {
-        BProcessManager.get().killPackageAsUser(packageName, userId);
+        BProcessManagerService.get().killPackageAsUser(packageName, userId);
     }
 
     @Override
@@ -625,7 +631,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
         synchronized (mPackages) {
             List<InstalledPackage> installedPackages = new ArrayList<>();
             for (BPackageSettings ps : mPackages.values()) {
-                if (ps.getInstalled(userId)) {
+                if (ps.getInstalled(userId) && !GmsCore.isGoogleAppOrService(ps.pkg.packageName)) {
                     InstalledPackage installedPackage = new InstalledPackage();
                     installedPackage.userId = userId;
                     installedPackage.packageName = ps.pkg.packageName;
@@ -636,7 +642,29 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
         }
     }
 
+    @Override
+    public String[] getPackagesForUid(int uid, int userId) throws RemoteException {
+        if (!sUserManager.exists(userId)) return new String[]{};
+        synchronized (mPackages) {
+            List<String> packages = new ArrayList<>();
+            for (BPackageSettings ps : mPackages.values()) {
+                String packageName = ps.pkg.packageName;
+                if (ps.getInstalled(userId) && getAppId(packageName) == uid) {
+                    packages.add(packageName);
+                }
+            }
+            if (packages.isEmpty()) {
+                ProcessRecord processByPid = BProcessManagerService.get().findProcessByPid(getCallingPid());
+                if (processByPid != null) {
+                    packages.add(processByPid.getPackageName());
+                }
+            }
+            return packages.toArray(new String[]{});
+        }
+    }
+
     private InstallResult installPackageAsUserLocked(String file, InstallOption option, int userId) {
+        long l = System.currentTimeMillis();
         InstallResult result = new InstallResult();
         File apkFile = null;
         try {
@@ -651,18 +679,24 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
                 apkFile = new File(file);
             }
 
-            if (option.isFlag(InstallOption.FLAG_Xposed) && userId != BUserHandle.USER_XPOSED) {
+            if (option.isFlag(InstallOption.FLAG_XPOSED) && userId != BUserHandle.USER_XPOSED) {
                 return new InstallResult().installError("Please install the XP module in XP module management");
             }
-            if (option.isFlag(InstallOption.FLAG_Xposed) && !XposedParserCompat.isXPModule(apkFile.getAbsolutePath())) {
+            if (option.isFlag(InstallOption.FLAG_XPOSED) && !XposedParserCompat.isXPModule(apkFile.getAbsolutePath())) {
                 return new InstallResult().installError("not a XP module");
+            }
+
+            PackageInfo packageArchiveInfo = BlackBoxCore.getPackageManager().getPackageArchiveInfo(apkFile.getAbsolutePath(), 0);
+            if (packageArchiveInfo == null) {
+                return result.installError("getPackageArchiveInfo error.Please check whether APK is normal.");
             }
 
             boolean support = AbiUtils.isSupport(apkFile);
             if (!support) {
-                return result.installError(BlackBoxCore.is64Bit() ? "not support armeabi-v7a abi" : "not support arm64-v8a abi");
+                String msg = packageArchiveInfo.applicationInfo.loadLabel(BlackBoxCore.getPackageManager()) + "[" + packageArchiveInfo.packageName + "]";
+                return result.installError(packageArchiveInfo.packageName,
+                        msg + (BlackBoxCore.is64Bit() ? " not support armeabi-v7a abi" : "not support arm64-v8a abi"));
             }
-
             PackageParser.Package aPackage = parserApk(apkFile.getAbsolutePath());
             if (aPackage == null) {
                 return result.installError("parser apk error.");
@@ -675,7 +709,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
             BPackageSettings bPackageSettings = mSettings.getPackageLPw(aPackage.packageName, aPackage, option);
 
             // stop pkg
-            BProcessManager.get().killPackageAsUser(aPackage.packageName, userId);
+            BProcessManagerService.get().killPackageAsUser(aPackage.packageName, userId);
 
             int i = BPackageInstallerService.get().installPackageAsUser(bPackageSettings, userId);
             if (i < 0) {
@@ -685,8 +719,9 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
                 bPackageSettings.setInstalled(true, userId);
                 bPackageSettings.save();
             }
+            mComponentResolver.removeAllComponents(bPackageSettings.pkg);
             mComponentResolver.addAllComponents(bPackageSettings.pkg);
-            mSettings.scanPackage();
+            mSettings.scanPackage(aPackage.packageName);
             onPackageInstalled(bPackageSettings.pkg.packageName, userId);
             return result;
         } catch (Throwable t) {
@@ -695,6 +730,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
             if (apkFile != null && option.isFlag(InstallOption.FLAG_URI_FILE)) {
                 FileUtils.deleteDir(apkFile);
             }
+            Slog.d(TAG, "install finish: " + (System.currentTimeMillis() - l) + "ms");
         }
         return result;
     }
@@ -750,12 +786,12 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
     }
 
     public void removePackageMonitor(PackageMonitor monitor) {
-        mPackageMonitors.add(monitor);
+        mPackageMonitors.remove(monitor);
     }
 
-    void onPackageUninstalled(String packageName, int userId) {
+    void onPackageUninstalled(String packageName, boolean isRemove, int userId) {
         for (PackageMonitor packageMonitor : mPackageMonitors) {
-            packageMonitor.onPackageUninstalled(packageName, userId);
+            packageMonitor.onPackageUninstalled(packageName, isRemove, userId);
         }
         Slog.d(TAG, "onPackageUninstalled: " + packageName + ", userId: " + userId);
     }
@@ -765,6 +801,14 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
             packageMonitor.onPackageInstalled(packageName, userId);
         }
         Slog.d(TAG, "onPackageInstalled: " + packageName + ", userId: " + userId);
+    }
+
+    public BPackageSettings getBPackageSetting(String packageName) {
+        return mPackages.get(packageName);
+    }
+
+    public List<BPackageSettings> getBPackageSettings() {
+        return new ArrayList<>(mPackages.values());
     }
 
     @Override

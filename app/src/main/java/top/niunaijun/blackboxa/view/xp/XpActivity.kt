@@ -1,29 +1,22 @@
 package top.niunaijun.blackboxa.view.xp
 
+import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.Menu
-import android.view.MenuItem
-import android.webkit.URLUtil
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import cbfg.rvadapter.RVAdapter
 import com.afollestad.materialdialogs.MaterialDialog
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.switchmaterial.SwitchMaterial
-import com.roger.catloadinglibrary.CatLoadingView
 import top.niunaijun.blackbox.BlackBoxCore
-import top.niunaijun.blackbox.utils.compat.BuildCompat
 import top.niunaijun.blackboxa.R
+import top.niunaijun.blackboxa.bean.XpModuleInfo
 import top.niunaijun.blackboxa.databinding.ActivityXpBinding
 import top.niunaijun.blackboxa.util.InjectionUtil
-import top.niunaijun.blackboxa.util.LoadingUtil
 import top.niunaijun.blackboxa.util.inflate
 import top.niunaijun.blackboxa.util.toast
-import top.niunaijun.blackboxa.view.base.BaseActivity
+import top.niunaijun.blackboxa.view.base.LoadingActivity
 import top.niunaijun.blackboxa.view.list.ListActivity
 
 /**
@@ -32,15 +25,14 @@ import top.niunaijun.blackboxa.view.list.ListActivity
  * @Author: wukaicheng
  * @CreateDate: 2021/5/2 20:25
  */
-class XpActivity : BaseActivity() {
+class XpActivity : LoadingActivity() {
 
     private val viewBinding: ActivityXpBinding by inflate()
 
-    private lateinit var loadingView: CatLoadingView
 
     private lateinit var viewModel: XpViewModel
 
-    private lateinit var mAdapter: XpAdapter
+    private lateinit var mAdapter: RVAdapter<XpModuleInfo>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,15 +51,11 @@ class XpActivity : BaseActivity() {
         viewBinding.stateView.showLoading()
         viewModel.getInstalledModule()
         viewModel.appsLiveData.observe(this) {
-            if (it != null) {
-                mAdapter.replaceData(it)
-                if (it.isEmpty()) {
-                    viewBinding.stateView.showEmpty()
-                } else {
-                    viewBinding.stateView.showContent()
-                }
-            } else {
+            if (it.isNullOrEmpty()) {
                 viewBinding.stateView.showEmpty()
+            } else {
+                mAdapter.setItems(it)
+                viewBinding.stateView.showContent()
             }
         }
 
@@ -78,39 +66,23 @@ class XpActivity : BaseActivity() {
                 viewModel.getInstalledModule()
             }
         }
+    }
 
-        viewModel.launchLiveData.observe(this) {
-            it?.run {
-                hideLoading()
-                if (!it) {
-                    toast("启动失败")
+        private fun initRecyclerView() {
+
+            mAdapter = RVAdapter<XpModuleInfo>(this, XpAdapter()).bind(viewBinding.recyclerView)
+                .setItemClickListener { view, item, position ->
+                    item.enable = !item.enable
+                    BlackBoxCore.get().setModuleEnable(item.packageName, item.enable)
+                    mAdapter.replaceAt(position, item)
+                    toast(R.string.restart_module)
+                }.setItemLongClickListener { _, item, _ ->
+                    unInstallModule(item.packageName)
                 }
-            }
+
+            viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
+            viewBinding.stateView.showEmpty()
         }
-    }
-
-    private fun initRecyclerView() {
-
-        mAdapter = XpAdapter()
-        viewBinding.recyclerView.adapter = mAdapter
-        viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
-        viewBinding.stateView.showEmpty()
-
-        mAdapter.setOnItemClick { _, _, _ ->
-            toast("请在外部启动模块")
-        }
-
-        mAdapter.setOnItemLongClick { _, _, data ->
-            unInstallModule(data.packageName)
-        }
-
-        mAdapter.setOnCheckChangeListener { data, isChecked ->
-
-            BlackBoxCore.get().setModuleEnable(data.packageName, isChecked)
-            toast("重新启动软件修改才能生效")
-
-        }
-    }
 
     private fun initFab() {
         viewBinding.fab.setOnClickListener {
@@ -133,20 +105,18 @@ class XpActivity : BaseActivity() {
         viewModel.appsLiveData.removeObservers(this)
         viewModel.resultLiveData.value = null
         viewModel.resultLiveData.removeObservers(this)
-        viewModel.launchLiveData.value = null
-        viewModel.launchLiveData.removeObservers(this)
     }
 
 
     private fun unInstallModule(packageName: String) {
         MaterialDialog(this).show {
-            title(text = "卸载模块")
-            message(text = "是否卸载该模块，卸载后将无法再发挥作用？")
-            positiveButton(text = "确定") {
+            title(R.string.uninstall_module)
+            message(R.string.uninstall_module_hint)
+            positiveButton(R.string.done) {
                 showLoading()
                 viewModel.unInstallModule(packageName)
             }
-            negativeButton(text = "取消")
+            negativeButton(R.string.cancel)
         }
     }
 
@@ -169,20 +139,13 @@ class XpActivity : BaseActivity() {
         }
     }
 
-    private fun showLoading() {
-        if (!this::loadingView.isInitialized) {
-            loadingView = CatLoadingView()
-        }
-
-        LoadingUtil.showLoading(loadingView, supportFragmentManager)
-    }
 
 
-    private fun hideLoading() {
-        if (this::loadingView.isInitialized) {
-            loadingView.dismiss()
+    companion object {
+        fun start(context: Context) {
+            val intent = Intent(context, XpActivity::class.java)
+            context.startActivity(intent)
         }
     }
-
 
 }

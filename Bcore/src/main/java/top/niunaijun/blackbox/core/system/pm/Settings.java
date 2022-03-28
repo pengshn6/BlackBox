@@ -15,13 +15,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import top.niunaijun.blackbox.core.env.BEnvironment;
 import top.niunaijun.blackbox.BlackBoxCore;
-import top.niunaijun.blackbox.entity.pm.InstallOption;
-import top.niunaijun.blackbox.core.system.BProcessManager;
+import top.niunaijun.blackbox.core.env.BEnvironment;
+import top.niunaijun.blackbox.core.system.BProcessManagerService;
 import top.niunaijun.blackbox.core.system.user.BUserHandle;
+import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.utils.FileUtils;
 import top.niunaijun.blackbox.utils.Slog;
+import top.niunaijun.blackbox.utils.compat.PackageParserCompat;
 
 /**
  * Created by Milk on 4/13/21.
@@ -36,11 +37,13 @@ import top.niunaijun.blackbox.utils.Slog;
 
     final ArrayMap<String, BPackageSettings> mPackages = new ArrayMap<>();
     private final Map<String, Integer> mAppIds = new HashMap<>();
+    private final Map<String, SharedUserSetting> mSharedUsers = SharedUserSetting.sSharedUsers;
     private int mCurrUid = 0;
 
     public Settings() {
         synchronized (mPackages) {
             loadUidLP();
+            SharedUserSetting.loadSharedUsers();
         }
     }
 
@@ -69,10 +72,23 @@ import top.niunaijun.blackbox.utils.Slog;
 
     boolean registerAppIdLPw(BPackageSettings p) {
         boolean createdNew = false;
+        String sharedUserId = p.pkg.mSharedUserId;
+        SharedUserSetting sharedUserSetting = null;
+        if (sharedUserId != null) {
+            sharedUserSetting = mSharedUsers.get(sharedUserId);
+            if (sharedUserSetting == null) {
+                sharedUserSetting = new SharedUserSetting(sharedUserId);
+                sharedUserSetting.userId = acquireAndRegisterNewAppIdLPw(p);
+                mSharedUsers.put(sharedUserId, sharedUserSetting);
+            }
+        }
+        if (sharedUserSetting != null) {
+            p.appId = sharedUserSetting.userId;
+            Slog.d(TAG, p.pkg.packageName + " sharedUserId = " + sharedUserId + ", setAppId = " + p.appId);
+        }
         if (p.appId == 0) {
             // Assign new user ID
             p.appId = acquireAndRegisterNewAppIdLPw(p);
-            createdNew = true;
         }
         if (p.appId < 0) {
             createdNew = false;
@@ -80,8 +96,11 @@ import top.niunaijun.blackbox.utils.Slog;
 //                    "Package " + p.name + " could not be assigned a valid UID");
 //            throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
 //                    "Package " + p.name + " could not be assigned a valid UID");
+        } else {
+            createdNew = true;
         }
         saveUidLP();
+        SharedUserSetting.saveSharedUsers();
         return createdNew;
     }
 
@@ -153,8 +172,14 @@ import top.niunaijun.blackbox.utils.Slog;
                 if (!app.isDirectory()) {
                     continue;
                 }
-                updatePackageLP(app);
+                scanPackage(app.getName());
             }
+        }
+    }
+
+    public void scanPackage(String packageName) {
+        synchronized (mPackages) {
+            updatePackageLP(BEnvironment.getAppDir(packageName));
         }
     }
 
@@ -169,18 +194,19 @@ import top.niunaijun.blackbox.utils.Slog;
             packageSettingsIn.setDataPosition(0);
 
             BPackageSettings bPackageSettings = new BPackageSettings(packageSettingsIn);
+            bPackageSettings.pkg.mExtras = bPackageSettings;
             if (bPackageSettings.installOption.isFlag(InstallOption.FLAG_SYSTEM)) {
                 PackageInfo packageInfo = BlackBoxCore.getPackageManager().getPackageInfo(packageName, PackageManager.GET_META_DATA);
                 String currPackageSourcePath = packageInfo.applicationInfo.sourceDir;
                 if (!currPackageSourcePath.equals(bPackageSettings.pkg.baseCodePath)) {
                     // update baseCodePath And Re install
-                    BProcessManager.get().killAllByPackageName(bPackageSettings.pkg.packageName);
-                    bPackageSettings.pkg.baseCodePath = currPackageSourcePath;
-                    BPackageInstallerService.get().updatePackage(bPackageSettings);
+                    BProcessManagerService.get().killAllByPackageName(bPackageSettings.pkg.packageName);
+                    BPackageSettings newPkg = reInstallBySystem(packageInfo, bPackageSettings.installOption);
+                    bPackageSettings.pkg = newPkg.pkg;
                 }
+            } else {
+                bPackageSettings.pkg.applicationInfo = PackageManagerCompat.generateApplicationInfo(bPackageSettings.pkg, 0, BPackageUserState.create(), 0);
             }
-            bPackageSettings.pkg.mExtras = bPackageSettings;
-            bPackageSettings.pkg.applicationInfo = PackageManagerCompat.generateApplicationInfo(bPackageSettings.pkg, 0, BPackageUserState.create(), 0);
             bPackageSettings.save();
             mPackages.put(bPackageSettings.pkg.packageName, bPackageSettings);
             Slog.d(TAG, "loaded Package: " + packageName);
@@ -188,12 +214,38 @@ import top.niunaijun.blackbox.utils.Slog;
             e.printStackTrace();
             // bad package
             FileUtils.deleteDir(app);
-            mPackages.remove(packageName);
-            BProcessManager.get().killAllByPackageName(packageName);
-            BPackageManagerService.get().onPackageUninstalled(packageName, BUserHandle.USER_ALL);
+            removePackage(packageName);
+            BProcessManagerService.get().killAllByPackageName(packageName);
+            BPackageManagerService.get().onPackageUninstalled(packageName, true, BUserHandle.USER_ALL);
             Slog.d(TAG, "bad Package: " + packageName);
         } finally {
             packageSettingsIn.recycle();
         }
+    }
+
+    private BPackageSettings reInstallBySystem(PackageInfo systemPackageInfo, InstallOption option) throws Exception {
+        Slog.d(TAG, "reInstallBySystem: " + systemPackageInfo.packageName);
+        PackageParser.Package aPackage = parserApk(systemPackageInfo.applicationInfo.sourceDir);
+        if (aPackage == null) {
+            throw new RuntimeException("parser apk error.");
+        }
+        aPackage.applicationInfo = BlackBoxCore.getPackageManager().getPackageInfo(aPackage.packageName, 0).applicationInfo;
+        return getPackageLPw(aPackage.packageName, aPackage, option);
+    }
+
+    public void removePackage(String packageName) {
+        mPackages.remove(packageName);
+    }
+
+    private PackageParser.Package parserApk(String file) {
+        try {
+            PackageParser parser = PackageParserCompat.createParser(new File(file));
+            PackageParser.Package aPackage = PackageParserCompat.parsePackage(parser, new File(file), 0);
+            PackageParserCompat.collectCertificates(parser, aPackage, 0);
+            return aPackage;
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        return null;
     }
 }

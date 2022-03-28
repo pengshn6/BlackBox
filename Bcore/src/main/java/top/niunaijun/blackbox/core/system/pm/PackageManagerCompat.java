@@ -1,6 +1,7 @@
 package top.niunaijun.blackbox.core.system.pm;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -12,6 +13,8 @@ import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.os.Build;
 
 import java.util.HashSet;
@@ -21,9 +24,10 @@ import black.android.content.pm.BRApplicationInfoL;
 import black.android.content.pm.BRApplicationInfoN;
 import black.android.content.pm.BRPackageParserSigningDetails;
 import black.android.content.pm.BRSigningInfo;
-import top.niunaijun.blackbox.core.env.BEnvironment;
+import black.android.content.res.BRAssetManager;
 import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.core.env.AppSystemEnv;
+import top.niunaijun.blackbox.core.env.BEnvironment;
 import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.utils.ArrayUtils;
 import top.niunaijun.blackbox.utils.FileUtils;
@@ -183,18 +187,27 @@ public class PackageManagerCompat {
                 }
             }
         }
+        PackageInfo base = null;
+        try {
+            base = BlackBoxCore.getContext().getPackageManager().getPackageInfo(p.packageName, flags);
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
         if ((flags & PackageManager.GET_SIGNATURES) != 0) {
-            if (BuildCompat.isPie()) {
-                pi.signatures = p.mSigningDetails.signatures;
-            } else {
+            if (base == null) {
                 pi.signatures = p.mSignatures;
+            } else {
+                pi.signatures = base.signatures;
             }
         }
         if (BuildCompat.isPie()) {
             if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
-                PackageParser.SigningDetails signingDetails = PackageParser.SigningDetails.UNKNOWN;
-                BRPackageParserSigningDetails.get(signingDetails)._set_signatures(p.mSigningDetails.signatures);
-                pi.signingInfo = BRSigningInfo.get()._new(signingDetails);
+                if (base == null) {
+                    PackageParser.SigningDetails signingDetails = PackageParser.SigningDetails.UNKNOWN;
+                    BRPackageParserSigningDetails.get(signingDetails)._set_signatures(p.mSigningDetails.signatures);
+                    pi.signingInfo = BRSigningInfo.get()._new(signingDetails);
+                } else {
+                    pi.signingInfo = base.signingInfo;
+                }
             }
         }
         return pi;
@@ -289,8 +302,8 @@ public class PackageManagerCompat {
         ai.processName = BPackageManagerService.fixProcessName(p.packageName, ai.packageName);
         ai.publicSourceDir = sourceDir;
         ai.sourceDir = sourceDir;
-//        ai.uid = p.mExtras.appId;
-        ai.uid = baseApplication.uid;
+        ai.uid = p.mExtras.appId;
+//        ai.uid = baseApplication.uid;
 
         if (BuildCompat.isL()) {
             BRApplicationInfoL.get(ai)._set_primaryCpuAbi(Build.CPU_ABI);
@@ -347,5 +360,16 @@ public class PackageManagerCompat {
 //        }
 //        sharedLibraryFileList.add(BEnvironment.JUNIT_JAR.getAbsolutePath());
         info.sharedLibraryFiles = sharedLibraryFileList.toArray(new String[]{});
+    }
+
+    public static Resources getResources(Context context, ApplicationInfo appInfo) {
+        BPackageSettings ps = BPackageManagerService.get().getBPackageSetting(appInfo.packageName);
+        if (ps != null) {
+            AssetManager assets = BRAssetManager.get()._new();
+            BRAssetManager.get(assets).addAssetPath(ps.pkg.baseCodePath);
+            Resources hostRes = context.getResources();
+            return new Resources(assets, hostRes.getDisplayMetrics(), hostRes.getConfiguration());
+        }
+        return null;
     }
 }

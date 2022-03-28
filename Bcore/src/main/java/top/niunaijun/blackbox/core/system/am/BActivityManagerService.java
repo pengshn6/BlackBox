@@ -1,6 +1,8 @@
 package top.niunaijun.blackbox.core.system.am;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
@@ -14,12 +16,17 @@ import java.util.List;
 import java.util.Map;
 
 import top.niunaijun.blackbox.BlackBoxCore;
-import top.niunaijun.blackbox.entity.AppConfig;
+import top.niunaijun.blackbox.core.system.BProcessManagerService;
 import top.niunaijun.blackbox.core.system.ISystemService;
-import top.niunaijun.blackbox.core.system.pm.BPackageManagerService;
-import top.niunaijun.blackbox.entity.UnbindRecord;
 import top.niunaijun.blackbox.core.system.ProcessRecord;
-import top.niunaijun.blackbox.core.system.BProcessManager;
+import top.niunaijun.blackbox.core.system.pm.BPackageManagerService;
+import top.niunaijun.blackbox.entity.AppConfig;
+import top.niunaijun.blackbox.entity.UnbindRecord;
+import top.niunaijun.blackbox.entity.am.PendingResultData;
+import top.niunaijun.blackbox.entity.am.ReceiverData;
+import top.niunaijun.blackbox.entity.am.RunningAppProcessInfo;
+import top.niunaijun.blackbox.entity.am.RunningServiceInfo;
+import top.niunaijun.blackbox.utils.Slog;
 
 import static android.content.pm.PackageManager.GET_META_DATA;
 
@@ -32,19 +39,25 @@ import static android.content.pm.PackageManager.GET_META_DATA;
  * 此处无Bug
  */
 public class BActivityManagerService extends IBActivityManagerService.Stub implements ISystemService {
-    public static final String TAG = "VActivityManagerService";
+    public static final String TAG = "BActivityManagerService";
     private static final BActivityManagerService sService = new BActivityManagerService();
     private final Map<Integer, UserSpace> mUserSpace = new HashMap<>();
+    private final BPackageManagerService mPms = BPackageManagerService.get();
+    private final BroadcastManager mBroadcastManager;
 
     public static BActivityManagerService get() {
         return sService;
     }
 
+    public BActivityManagerService() {
+        mBroadcastManager = BroadcastManager.startSystem(this, mPms);
+    }
+
     @Override
-    public ComponentName startService(Intent intent, String resolvedType, int userId) {
+    public ComponentName startService(Intent intent, String resolvedType, boolean requireForeground, int userId) {
         UserSpace userSpace = getOrCreateSpaceLocked(userId);
         synchronized (userSpace.mActiveServices) {
-            userSpace.mActiveServices.startService(intent, resolvedType, userId);
+            userSpace.mActiveServices.startService(intent, resolvedType, requireForeground, userId);
         }
         return null;
     }
@@ -52,16 +65,20 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     @Override
     public IBinder acquireContentProviderClient(ProviderInfo providerInfo) throws RemoteException {
         int callingPid = Binder.getCallingPid();
-        ProcessRecord processRecord = BProcessManager.get().startProcessLocked(providerInfo.packageName,
+        ProcessRecord processRecord = BProcessManagerService.get().startProcessLocked(providerInfo.packageName,
                 providerInfo.processName,
-                BProcessManager.get().getUserIdByCallingPid(callingPid),
+                BProcessManagerService.get().getUserIdByCallingPid(callingPid),
                 -1,
-                Binder.getCallingUid(),
                 Binder.getCallingPid());
         if (processRecord == null) {
             throw new RuntimeException("Unable to create process " + providerInfo.name);
         }
-        return processRecord.bActivityThread.acquireContentProviderClient(providerInfo);
+        try {
+            return processRecord.bActivityThread.acquireContentProviderClient(providerInfo);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -69,15 +86,21 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
         List<ResolveInfo> resolves = BPackageManagerService.get().queryBroadcastReceivers(intent, GET_META_DATA, resolvedType, userId);
 
         for (ResolveInfo resolve : resolves) {
-            ProcessRecord processRecord = BProcessManager.get().findProcessRecord(resolve.activityInfo.packageName, resolve.activityInfo.processName, userId);
+            ProcessRecord processRecord = BProcessManagerService.get().findProcessRecord(resolve.activityInfo.packageName, resolve.activityInfo.processName, userId);
             if (processRecord == null) {
                 continue;
             }
-            processRecord.bActivityThread.bindApplication();
+            try {
+                processRecord.bActivityThread.bindApplication();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
-        intent.setPackage(BlackBoxCore.getHostPkg());
-        intent.setComponent(null);
-        return intent;
+        Intent shadow = new Intent();
+        shadow.setPackage(BlackBoxCore.getHostPkg());
+        shadow.setComponent(null);
+        shadow.setAction(intent.getAction());
+        return shadow;
     }
 
     @Override
@@ -91,7 +114,7 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     @Override
     public void onActivityCreated(int taskId, IBinder token, IBinder activityRecord) throws RemoteException {
         int callingPid = Binder.getCallingPid();
-        ProcessRecord process = BProcessManager.get().findProcessByPid(callingPid);
+        ProcessRecord process = BProcessManagerService.get().findProcessByPid(callingPid);
         if (process == null) {
             return;
         }
@@ -105,7 +128,7 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     @Override
     public void onActivityResumed(IBinder token) throws RemoteException {
         int callingPid = Binder.getCallingPid();
-        ProcessRecord process = BProcessManager.get().findProcessByPid(callingPid);
+        ProcessRecord process = BProcessManagerService.get().findProcessByPid(callingPid);
         if (process == null) {
             return;
         }
@@ -118,7 +141,7 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     @Override
     public void onActivityDestroyed(IBinder token) throws RemoteException {
         int callingPid = Binder.getCallingPid();
-        ProcessRecord process = BProcessManager.get().findProcessByPid(callingPid);
+        ProcessRecord process = BProcessManagerService.get().findProcessByPid(callingPid);
         if (process == null) {
             return;
         }
@@ -131,7 +154,7 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     @Override
     public void onFinishActivity(IBinder token) throws RemoteException {
         int callingPid = Binder.getCallingPid();
-        ProcessRecord process = BProcessManager.get().findProcessByPid(callingPid);
+        ProcessRecord process = BProcessManagerService.get().findProcessByPid(callingPid);
         if (process == null) {
             return;
         }
@@ -139,6 +162,114 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
         synchronized (userSpace.mStack) {
             userSpace.mStack.onFinishActivity(process.userId, token);
         }
+    }
+
+    @Override
+    public RunningAppProcessInfo getRunningAppProcesses(String callerPackage, int userId) throws RemoteException {
+        ActivityManager manager = (ActivityManager)
+                BlackBoxCore.getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = manager.getRunningAppProcesses();
+        Map<Integer, ActivityManager.RunningAppProcessInfo> runningProcessMap = new HashMap<>();
+        for (ActivityManager.RunningAppProcessInfo runningProcess : runningAppProcesses) {
+            runningProcessMap.put(runningProcess.pid, runningProcess);
+        }
+        List<ProcessRecord> packageProcessAsUser = BProcessManagerService.get().getPackageProcessAsUser(callerPackage, userId);
+
+        RunningAppProcessInfo appProcessInfo = new RunningAppProcessInfo();
+        for (ProcessRecord processRecord : packageProcessAsUser) {
+            ActivityManager.RunningAppProcessInfo runningAppProcessInfo = runningProcessMap.get(processRecord.pid);
+            if (runningAppProcessInfo != null) {
+                runningAppProcessInfo.processName = processRecord.processName;
+                appProcessInfo.mAppProcessInfoList.add(runningAppProcessInfo);
+            }
+        }
+        return appProcessInfo;
+    }
+
+    @Override
+    public RunningServiceInfo getRunningServices(String callerPackage, int userId) throws RemoteException {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mActiveServices) {
+            return userSpace.mActiveServices.getRunningServiceInfo(callerPackage, userId);
+        }
+    }
+
+    @Override
+    public void scheduleBroadcastReceiver(Intent intent, PendingResultData pendingResultData, int userId) throws RemoteException {
+        List<ResolveInfo> resolves = BPackageManagerService.get().queryBroadcastReceivers(intent, GET_META_DATA, null, userId);
+
+        if (resolves.isEmpty()) {
+            pendingResultData.build().finish();
+            Slog.d(TAG, "scheduleBroadcastReceiver empty");
+            return;
+        }
+        mBroadcastManager.sendBroadcast(pendingResultData);
+        for (ResolveInfo resolve : resolves) {
+            ProcessRecord processRecord = BProcessManagerService.get().findProcessRecord(resolve.activityInfo.packageName, resolve.activityInfo.processName, userId);
+            if (processRecord != null) {
+                ReceiverData data = new ReceiverData();
+                data.intent = intent;
+                data.activityInfo = resolve.activityInfo;
+                data.data = pendingResultData;
+                processRecord.bActivityThread.scheduleReceiver(data);
+            }
+        }
+    }
+
+    @Override
+    public void finishBroadcast(PendingResultData data) throws RemoteException {
+        mBroadcastManager.finishBroadcast(data);
+    }
+
+    @Override
+    public String getCallingPackage(IBinder token, int userId) throws RemoteException {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mStack) {
+            return userSpace.mStack.getCallingPackage(token, userId);
+        }
+    }
+
+    @Override
+    public ComponentName getCallingActivity(IBinder token, int userId) throws RemoteException {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mStack) {
+            return userSpace.mStack.getCallingActivity(token, userId);
+        }
+    }
+
+    @Override
+    public void getIntentSender(IBinder target, String packageName, int uid, int userId) {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mIntentSenderRecords) {
+            PendingIntentRecord record = new PendingIntentRecord();
+            record.uid = uid;
+            record.packageName = packageName;
+            userSpace.mIntentSenderRecords.put(target, record);
+        }
+    }
+
+    @Override
+    public String getPackageForIntentSender(IBinder target, int userId) throws RemoteException {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mIntentSenderRecords) {
+            PendingIntentRecord record = userSpace.mIntentSenderRecords.get(target);
+            if (record != null) {
+                return record.packageName;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public int getUidForIntentSender(IBinder target, int userId) throws RemoteException {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mIntentSenderRecords) {
+            PendingIntentRecord record = userSpace.mIntentSenderRecords.get(target);
+            if (record != null) {
+                return record.uid;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -153,7 +284,7 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     public UnbindRecord onServiceUnbind(Intent proxyIntent, int userId) throws RemoteException {
         UserSpace userSpace = getOrCreateSpaceLocked(userId);
         synchronized (userSpace.mActiveServices) {
-            return  userSpace.mActiveServices.onServiceUnbind(proxyIntent, userId);
+            return userSpace.mActiveServices.onServiceUnbind(proxyIntent, userId);
         }
     }
 
@@ -190,8 +321,16 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     }
 
     @Override
+    public void stopServiceToken(ComponentName className, IBinder token, int userId) throws RemoteException {
+        UserSpace userSpace = getOrCreateSpaceLocked(userId);
+        synchronized (userSpace.mActiveServices) {
+            userSpace.mActiveServices.stopServiceToken(className, token, userId);
+        }
+    }
+
+    @Override
     public AppConfig initProcess(String packageName, String processName, int userId) throws RemoteException {
-        ProcessRecord processRecord = BProcessManager.get().startProcessLocked(packageName, processName, userId, -1, Binder.getCallingUid(), Binder.getCallingPid());
+        ProcessRecord processRecord = BProcessManagerService.get().startProcessLocked(packageName, processName, userId, -1, Binder.getCallingPid());
         if (processRecord == null)
             return null;
         return processRecord.getClientConfig();
@@ -199,7 +338,7 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
 
     @Override
     public void restartProcess(String packageName, String processName, int userId) throws RemoteException {
-        BProcessManager.get().restartAppProcess(packageName, processName, userId);
+        BProcessManagerService.get().restartAppProcess(packageName, processName, userId);
     }
 
     @Override
@@ -239,6 +378,6 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
 
     @Override
     public void systemReady() {
-
+        mBroadcastManager.startup();
     }
 }

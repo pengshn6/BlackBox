@@ -7,8 +7,8 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 
-import top.niunaijun.blackbox.utils.compat.ContentProviderCompat;
 import top.niunaijun.blackbox.BlackBoxCore;
+import top.niunaijun.blackbox.utils.compat.ContentProviderCompat;
 
 /**
  * Created by Milk on 4/1/21.
@@ -21,7 +21,7 @@ import top.niunaijun.blackbox.BlackBoxCore;
 public class ProviderCall {
     public static Bundle callSafely(String authority, String methodName, String arg, Bundle bundle) {
         try {
-            return call(authority, BlackBoxCore.get().getContext(), methodName, arg, bundle, 5);
+            return call(authority, BlackBoxCore.getContext(), methodName, arg, bundle, 5);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

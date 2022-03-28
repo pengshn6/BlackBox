@@ -54,12 +54,24 @@ public class BEnvironment {
         return new File(getSystemDir(), "user.conf");
     }
 
+    public static File getAccountsConf() {
+        return new File(getSystemDir(), "accounts.conf");
+    }
+
     public static File getUidConf() {
         return new File(getSystemDir(), "uid.conf");
     }
 
+    public static File getSharedUserConf() {
+        return new File(getSystemDir(), "shared-user.conf");
+    }
+
     public static File getXPModuleConf() {
         return new File(getSystemDir(), "xposed-module.conf");
+    }
+
+    public static File getFakeLocationConf() {
+        return new File(getSystemDir(), "fake-location.conf");
     }
 
     public static File getPackageConf(String packageName) {

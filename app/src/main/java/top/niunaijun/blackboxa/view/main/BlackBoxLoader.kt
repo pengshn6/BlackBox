@@ -4,16 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import top.niunaijun.blackbox.BlackBoxCore
+import top.niunaijun.blackbox.app.BActivityThread
 import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback
 import top.niunaijun.blackbox.app.configuration.ClientConfiguration
-import top.niunaijun.blackbox.utils.FileUtils
-import top.niunaijun.blackbox.utils.compat.BuildCompat
 import top.niunaijun.blackboxa.app.App
+import top.niunaijun.blackboxa.app.rocker.RockerManager
 import top.niunaijun.blackboxa.biz.cache.AppSharedPreferenceDelegate
+import top.niunaijun.blackboxa.util.toast
 import java.io.File
-import java.io.FileWriter
-import java.io.PrintWriter
-import java.util.*
 
 /**
  *
@@ -26,8 +24,8 @@ class BlackBoxLoader {
 
     private var mHideRoot by AppSharedPreferenceDelegate(App.getContext(), false)
     private var mHideXposed by AppSharedPreferenceDelegate(App.getContext(), false)
+    private var mDaemonEnable by AppSharedPreferenceDelegate(App.getContext(), false)
 
-    private val mLogDir = getLogDir(App.getContext())
 
     fun hideRoot(): Boolean {
         return mHideRoot
@@ -37,12 +35,20 @@ class BlackBoxLoader {
         this.mHideRoot = hideRoot
     }
 
+    fun hideXposed(): Boolean {
+        return mHideXposed
+    }
+
     fun invalidHideXposed(hideXposed: Boolean) {
         this.mHideXposed = hideXposed
     }
 
-    fun hideXposed(): Boolean {
-        return mHideXposed
+    fun daemonEnable(): Boolean {
+        return mDaemonEnable
+    }
+
+    fun invalidDaemonEnable(enable: Boolean) {
+        this.mDaemonEnable = enable
     }
 
     fun getBlackBoxCore(): BlackBoxCore {
@@ -54,15 +60,18 @@ class BlackBoxLoader {
             override fun beforeCreateApplication(
                 packageName: String?,
                 processName: String?,
-                context: Context?
+                context: Context?,
+                userId: Int
             ) {
-                Log.d(TAG, "beforeCreateApplication: pkg $packageName, processName $processName")
+                Log.d(TAG, "beforeCreateApplication: pkg $packageName, processName $processName,userID:${BActivityThread.getUserId()}")
             }
+
 
             override fun beforeApplicationOnCreate(
                 packageName: String?,
                 processName: String?,
-                application: Application?
+                application: Application?,
+                userId: Int
             ) {
                 Log.d(TAG, "beforeApplicationOnCreate: pkg $packageName, processName $processName")
             }
@@ -70,9 +79,11 @@ class BlackBoxLoader {
             override fun afterApplicationOnCreate(
                 packageName: String?,
                 processName: String?,
-                application: Application?
+                application: Application?,
+                userId: Int
             ) {
                 Log.d(TAG, "afterApplicationOnCreate: pkg $packageName, processName $processName")
+                RockerManager.init(application,userId)
             }
         })
     }
@@ -90,18 +101,22 @@ class BlackBoxLoader {
             override fun isHideXposed(): Boolean {
                 return mHideXposed
             }
+
+            override fun isEnableDaemonService(): Boolean {
+                return mDaemonEnable
+            }
+
+            override fun requestInstallPackage(file: File?): Boolean {
+                val packageInfo =
+                    context.packageManager.getPackageArchiveInfo(file!!.absolutePath, 0)
+                return false
+            }
         })
     }
 
     fun doOnCreate(context: Context) {
         BlackBoxCore.get().doCreate()
 
-        BlackBoxCore.get().setExceptionHandler { t, e ->
-            val logFile = File(mLogDir, "${System.currentTimeMillis()}.log")
-//            PrintWriter(FileWriter(logFile)).use {
-//                e.printStackTrace(it)
-//            }
-        }
     }
 
 
@@ -109,20 +124,6 @@ class BlackBoxLoader {
 
         val TAG: String = BlackBoxLoader::class.java.simpleName
 
-        fun getLogDir(context: Context): String {
-            return if (BuildCompat.isR()) {
-                val log = File(
-                    context.externalCacheDir?.parentFile?.parentFile?.parentFile?.parentFile,
-                    "Download/BlackBoxLog"
-                )
-                FileUtils.mkdirs(log)
-                log.absolutePath
-            } else {
-                val log = File(context.externalCacheDir?.parentFile, "BlackBoxLog")
-                FileUtils.mkdirs(log)
-                log.absolutePath
-            }
-        }
     }
 
 }

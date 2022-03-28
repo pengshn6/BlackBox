@@ -1,6 +1,8 @@
 package top.niunaijun.blackboxa.view.list
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -8,9 +10,10 @@ import android.view.inputmethod.InputMethodManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import cbfg.rvadapter.RVAdapter
 import com.ferfalk.simplesearchview.SimpleSearchView
 import top.niunaijun.blackboxa.R
-import top.niunaijun.blackboxa.bean.AppInfo
+import top.niunaijun.blackboxa.bean.InstalledAppBean
 import top.niunaijun.blackboxa.databinding.ActivityListBinding
 import top.niunaijun.blackboxa.util.InjectionUtil
 import top.niunaijun.blackboxa.util.inflate
@@ -21,11 +24,11 @@ class ListActivity : BaseActivity() {
 
     private val viewBinding: ActivityListBinding by inflate()
 
-    private lateinit var mAdapter: ListAdapter
+    private lateinit var mAdapter: RVAdapter<InstalledAppBean>
 
     private lateinit var viewModel: ListViewModel
 
-    private var appList: List<AppInfo> = ArrayList()
+    private var appList: List<InstalledAppBean> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +36,12 @@ class ListActivity : BaseActivity() {
 
         initToolbar(viewBinding.toolbarLayout.toolbar, R.string.installed_app, true)
 
-        mAdapter = ListAdapter()
-        viewBinding.recyclerView.adapter = mAdapter
+        mAdapter = RVAdapter<InstalledAppBean>(this,ListAdapter()).bind(viewBinding.recyclerView).setItemClickListener { _, item, _ ->
+            finishWithResult(item.packageName)
+        }
+
         viewBinding.recyclerView.layoutManager = LinearLayoutManager(this)
 
-        mAdapter.setOnItemClick { _, _, data ->
-            finishWithResult(data.packageName)
-        }
 
         initSearchView()
         initViewModel()
@@ -66,16 +68,17 @@ class ListActivity : BaseActivity() {
     private fun initViewModel() {
         viewModel = ViewModelProvider(this, InjectionUtil.getListFactory()).get(ListViewModel::class.java)
         val onlyShowXp = intent.getBooleanExtra("onlyShowXp", false)
+        val userID = intent.getIntExtra("userID",0)
 
         if (onlyShowXp) {
             viewModel.getInstalledModules()
             viewBinding.toolbarLayout.toolbar.setTitle(R.string.installed_module)
         } else {
-            viewModel.getInstallAppList()
+            viewModel.getInstallAppList(userID)
             viewBinding.toolbarLayout.toolbar.setTitle(R.string.installed_app)
         }
 
-        viewModel.previewingLiveData.observe(this) {
+        viewModel.loadingLiveData.observe(this) {
             if (it) {
                 viewBinding.stateView.showLoading()
             } else {
@@ -103,7 +106,7 @@ class ListActivity : BaseActivity() {
         val newList = this.appList.filter {
             it.name.contains(newText, true) or it.packageName.contains(newText, true)
         }
-        mAdapter.replaceData(newList)
+        mAdapter.setItems(newList)
     }
 
     private val openDocumentedResult = registerForActivityResult(ActivityResultContracts.GetContent()) {
@@ -148,9 +151,18 @@ class ListActivity : BaseActivity() {
 
     override fun onStop() {
         super.onStop()
-        viewModel.previewingLiveData.postValue(true)
-        viewModel.previewingLiveData.removeObservers(this)
+        viewModel.loadingLiveData.postValue(true)
+        viewModel.loadingLiveData.removeObservers(this)
         viewModel.appsLiveData.postValue(null)
         viewModel.appsLiveData.removeObservers(this)
+    }
+
+
+    companion object{
+        fun start(context: Context,onlyShowXp:Boolean){
+            val intent = Intent(context,ListActivity::class.java)
+            intent.putExtra("onlyShowXp",onlyShowXp)
+            context.startActivity(intent)
+        }
     }
 }

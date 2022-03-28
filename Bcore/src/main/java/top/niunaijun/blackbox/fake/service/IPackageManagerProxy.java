@@ -9,22 +9,23 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.IInterface;
-import android.os.Process;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import black.android.app.BRActivityThread;
 import black.android.app.BRContextImpl;
 import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.app.BActivityThread;
+import top.niunaijun.blackbox.core.env.AppSystemEnv;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
-import top.niunaijun.blackbox.core.env.AppSystemEnv;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
 import top.niunaijun.blackbox.utils.MethodParameterUtils;
 import top.niunaijun.blackbox.utils.Reflector;
+import top.niunaijun.blackbox.utils.Slog;
 import top.niunaijun.blackbox.utils.compat.ParceledListSliceCompat;
 
 /**
@@ -49,7 +50,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
 
     @Override
     protected void inject(Object baseInvocation, Object proxyInvocation) {
-        BRActivityThread.get()._set_sPackageManager((IInterface) proxyInvocation);
+        BRActivityThread.get()._set_sPackageManager(proxyInvocation);
         replaceSystemService("package");
         Object systemContext = BRActivityThread.get(BlackBoxCore.mainThread()).getSystemContext();
         PackageManager packageManager = BRContextImpl.get(systemContext).mPackageManager();
@@ -69,7 +70,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         return false;
     }
 
-    @ProxyMethod(name = "resolveIntent")
+    @ProxyMethod("resolveIntent")
     public static class ResolveIntent extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -84,16 +85,30 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "setComponentEnabledSetting")
+    @ProxyMethod("resolveService")
+    public static class ResolveService extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            Intent intent = (Intent) args[0];
+            String resolvedType = (String) args[1];
+            int flags = (int) args[2];
+            ResolveInfo resolveInfo = BlackBoxCore.getBPackageManager().resolveService(intent, flags, resolvedType, BActivityThread.getUserId());
+            if (resolveInfo != null) {
+                return resolveInfo;
+            }
+            return method.invoke(who, args);
+        }
+    }
+
+    @ProxyMethod("setComponentEnabledSetting")
     public static class SetComponentEnabledSetting extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
-            // todo
             return 0;
         }
     }
 
-    @ProxyMethod(name = "getPackageInfo")
+    @ProxyMethod("getPackageInfo")
     public static class GetPackageInfo extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -113,7 +128,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getPackageUid")
+    @ProxyMethod("getPackageUid")
     public static class GetPackageUid extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -122,7 +137,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getProviderInfo")
+    @ProxyMethod("getProviderInfo")
     public static class GetProviderInfo extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -138,7 +153,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getReceiverInfo")
+    @ProxyMethod("getReceiverInfo")
     public static class GetReceiverInfo extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -154,7 +169,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getActivityInfo")
+    @ProxyMethod("getActivityInfo")
     public static class GetActivityInfo extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -170,7 +185,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getServiceInfo")
+    @ProxyMethod("getServiceInfo")
     public static class GetServiceInfo extends MethodHook {
 
         @Override
@@ -187,7 +202,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getInstalledApplications")
+    @ProxyMethod("getInstalledApplications")
     public static class GetInstalledApplications extends MethodHook {
 
         @Override
@@ -198,7 +213,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getInstalledPackages")
+    @ProxyMethod("getInstalledPackages")
     public static class GetInstalledPackages extends MethodHook {
 
         @Override
@@ -209,7 +224,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getApplicationInfo")
+    @ProxyMethod("getApplicationInfo")
     public static class GetApplicationInfo extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -229,18 +244,18 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "queryContentProviders")
+    @ProxyMethod("queryContentProviders")
     public static class QueryContentProviders extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             int flags = (int) args[2];
             List<ProviderInfo> providers = BlackBoxCore.getBPackageManager().
-                    queryContentProviders(BActivityThread.getAppProcessName(), Process.myUid(), flags, BActivityThread.getUserId());
+                    queryContentProviders(BActivityThread.getAppProcessName(), BActivityThread.getBUid(), flags, BActivityThread.getUserId());
             return ParceledListSliceCompat.create(providers);
         }
     }
 
-    @ProxyMethod(name = "resolveContentProvider")
+    @ProxyMethod("resolveContentProvider")
     public static class ResolveContentProvider extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -254,7 +269,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "canRequestPackageInstalls")
+    @ProxyMethod("canRequestPackageInstalls")
     public static class CanRequestPackageInstalls extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -263,15 +278,44 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "getPackagesForUid")
+    @ProxyMethod("getPackagesForUid")
     public static class GetPackagesForUid extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
-            int uid = (int) args[0];
-            if (uid == Process.myUid()) {
-                return new String[]{BActivityThread.getAppPackageName()};
+            int uid = (Integer) args[0];
+            if (uid == BlackBoxCore.getHostUid()) {
+                args[0] = BActivityThread.getBUid();
+                uid = (int) args[0];
             }
-            return method.invoke(who, args);
+            String[] packagesForUid = BlackBoxCore.getBPackageManager().getPackagesForUid(uid);
+            Slog.d(TAG, args[0] + " , " + BActivityThread.getAppProcessName() + " GetPackagesForUid: " + Arrays.toString(packagesForUid));
+            return packagesForUid;
+        }
+    }
+
+    @ProxyMethod("getInstallerPackageName")
+    public static class GetInstallerPackageName extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            // fake google play
+            return "com.android.vending";
+        }
+    }
+
+    @ProxyMethod("getSharedLibraries")
+    public static class GetSharedLibraries extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            // todo
+            return ParceledListSliceCompat.create(new ArrayList<>());
+        }
+    }
+
+    @ProxyMethod("getComponentEnabledSetting")
+    public static class getComponentEnabledSetting extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
         }
     }
 }

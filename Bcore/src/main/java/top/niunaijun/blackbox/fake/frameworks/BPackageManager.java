@@ -14,11 +14,12 @@ import java.util.Collections;
 import java.util.List;
 
 import top.niunaijun.blackbox.BlackBoxCore;
+import top.niunaijun.blackbox.app.BActivityThread;
+import top.niunaijun.blackbox.core.system.ServiceManager;
+import top.niunaijun.blackbox.core.system.pm.IBPackageManagerService;
 import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.entity.pm.InstallResult;
 import top.niunaijun.blackbox.entity.pm.InstalledPackage;
-import top.niunaijun.blackbox.core.system.ServiceManager;
-import top.niunaijun.blackbox.core.system.pm.IBPackageManagerService;
 
 /**
  * Created by Milk on 4/14/21.
@@ -28,12 +29,16 @@ import top.niunaijun.blackbox.core.system.pm.IBPackageManagerService;
  * しーＪ
  * 此处无Bug
  */
-public class BPackageManager {
+public class BPackageManager extends BlackManager<IBPackageManagerService> {
     private static final BPackageManager sPackageManager = new BPackageManager();
-    private IBPackageManagerService mService;
 
     public static BPackageManager get() {
         return sPackageManager;
+    }
+
+    @Override
+    protected String getServiceName() {
+        return ServiceManager.PACKAGE_MANAGER;
     }
 
     public Intent getLaunchIntentForPackage(String packageName, int userId) {
@@ -260,15 +265,16 @@ public class BPackageManager {
         return Collections.emptyList();
     }
 
-    private void crash(Throwable e) {
-        e.printStackTrace();
+    public String[] getPackagesForUid(int uid) {
+        try {
+            return getService().getPackagesForUid(uid, BActivityThread.getUserId());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return new String[]{};
     }
 
-    private IBPackageManagerService getService() {
-        if (mService != null && mService.asBinder().isBinderAlive()) {
-            return mService;
-        }
-        mService = IBPackageManagerService.Stub.asInterface(BlackBoxCore.get().getService(ServiceManager.PACKAGE_MANAGER));
-        return getService();
+    private void crash(Throwable e) {
+        e.printStackTrace();
     }
 }

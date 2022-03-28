@@ -1,7 +1,6 @@
 package top.niunaijun.blackbox.fake.service;
 
 import android.os.IInterface;
-import android.os.Process;
 import android.os.storage.StorageVolume;
 
 import java.lang.reflect.Method;
@@ -51,12 +50,12 @@ public class IStorageManagerProxy extends BinderInvocationStub {
         return false;
     }
 
-    @ProxyMethod(name = "getVolumeList")
+    @ProxyMethod("getVolumeList")
     public static class GetVolumeList extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             if (args == null) {
-                StorageVolume[] volumeList = BlackBoxCore.getBStorageManager().getVolumeList(Process.myUid(), null, 0, BActivityThread.getUserId());
+                StorageVolume[] volumeList = BlackBoxCore.getBStorageManager().getVolumeList(BActivityThread.getBUid(), null, 0, BActivityThread.getUserId());
                 if (volumeList == null) {
                     return method.invoke(who, args);
                 }
@@ -77,7 +76,7 @@ public class IStorageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "mkdirs")
+    @ProxyMethod("mkdirs")
     public static class mkdirs extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {

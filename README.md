@@ -1,4 +1,4 @@
-![xx](banner.png)
+![xx](assets/banner.png)
 ### [English Version](README_EN.md)
 
 # 虚拟引擎 · BlackBox
@@ -14,13 +14,17 @@
 [Telegram](https://t.me/fvblackbox)
 
 ## 支持
-暂不考虑4x，目前已兼容 5.0 ～ 12.0并跟进后续新系统
+暂不考虑4x，目前已兼容 5.0 ～ 12.0并跟进后续新系统。
+
+如果条件允许，降级targetSdkVersion到28或以下可以获得更好的兼容性。
+
+## 编译版本下载
+稳定版与测试版下载
+- 稳定版 由管理员手动发布经过验证稳定后的版本。[下载地址](https://github.com/FBlackBox/BlackBox/releases)
+- 测试版 由机器自动编译最新的代码的版本，可体验最新体验也有可能存在问题。 [下载地址](https://github.com/AutoBlackBox/BlackBox/tags)
 
 ## 架构说明
 本项目区分32位与64位，目前是2个不同的app，如在Demo已安装列表内无法找到需要开启的app说明不支持，请编译其他的架构。
-
-## 手动编译
-**第一次编译请Make Project一次，否则双开应用闪退。**
 
 ## 如何使用
 ### Step 1.初始化，在Application中加入以下代码初始化
@@ -62,6 +66,9 @@
    BlackBoxCore.get().launchApk("com.tencent.mm", userId);
 ```
 
+### 多开应用操作
+<img src="assets/multiw.gif" width="50%">
+
 ### 相关API
 #### 获取黑盒内已安装的应用
 ```java
@@ -97,6 +104,12 @@
 ## 计划
  - 更多的Service API 虚拟化（目前许多是使用系统API，只有少数已实现）
  - 提供更多接口给开发者（虚拟定位、应用注入等）
+
+## 赞助
+本项目为免费开源项目，日常维护耗费大量精力。如想加快进度或请作者喝杯咖啡。
+
+- BTC: 3FCo9QtaSbGMhmZYzvL4XUoJUUxZeSdha4
+- USDT（TRC20）: TDzBj9eV1Cdmmj9xd5Y1YLsQqC8zVgi7yd
 
 ## 感谢
 - [VirtualApp](https://github.com/asLody/VirtualApp)

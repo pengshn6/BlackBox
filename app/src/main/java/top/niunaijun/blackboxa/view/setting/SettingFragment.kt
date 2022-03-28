@@ -6,10 +6,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import top.niunaijun.blackbox.BlackBoxCore
-import top.niunaijun.blackbox.utils.compat.BuildCompat
 import top.niunaijun.blackboxa.R
 import top.niunaijun.blackboxa.app.AppManager
 import top.niunaijun.blackboxa.util.toast
+import top.niunaijun.blackboxa.view.gms.GmsManagerActivity
 import top.niunaijun.blackboxa.view.xp.XpActivity
 
 /**
@@ -41,25 +41,65 @@ class SettingFragment : PreferenceFragmentCompat() {
             requireContext().startActivity(intent)
             true
         }
+        initGms()
 
-        val xpHidePreference: Preference = (findPreference("xp_hide")!!)
-        val hideXposed = AppManager.mBlackBoxLoader.hideXposed()
-        invalidHideState(xpHidePreference, hideXposed)
+        invalidHideState{
+            val xpHidePreference: Preference = (findPreference("xp_hide")!!)
+            val hideXposed = AppManager.mBlackBoxLoader.hideXposed()
+            xpHidePreference.setDefaultValue(hideXposed)
+            xpHidePreference
+        }
 
-        val rootHidePreference: Preference = (findPreference("root_hide")!!)
-        val hideRoot = AppManager.mBlackBoxLoader.hideRoot()
-        invalidHideState(rootHidePreference, hideRoot)
+        invalidHideState{
+            val rootHidePreference: Preference = (findPreference("root_hide")!!)
+            val hideRoot = AppManager.mBlackBoxLoader.hideRoot()
+            rootHidePreference.setDefaultValue(hideRoot)
+            rootHidePreference
+        }
+
+        invalidHideState {
+            val daemonPreference: Preference = (findPreference("daemon_enable")!!)
+            val mDaemonEnable = AppManager.mBlackBoxLoader.daemonEnable()
+            daemonPreference.setDefaultValue(mDaemonEnable)
+            daemonPreference
+        }
     }
 
-    private fun invalidHideState(pref: Preference, hide: Boolean) {
-        pref.setDefaultValue(hide)
+    private fun initGms() {
+        val gmsManagerPreference: Preference = (findPreference("gms_manager")!!)
+
+        if (BlackBoxCore.get().isSupportGms) {
+
+            gmsManagerPreference.setOnPreferenceClickListener {
+                GmsManagerActivity.start(requireContext())
+                true
+            }
+        } else {
+            gmsManagerPreference.summary = getString(R.string.no_gms)
+            gmsManagerPreference.isEnabled = false
+        }
+    }
+
+    private fun invalidHideState(block: () -> Preference) {
+        val pref = block()
         pref.setOnPreferenceChangeListener { preference, newValue ->
             val tmpHide = (newValue == true)
-            if (preference.key == "xp_hide") {
-                AppManager.mBlackBoxLoader.invalidHideXposed(tmpHide)
-            } else {
-                AppManager.mBlackBoxLoader.invalidHideRoot(tmpHide)
+            when (preference.key) {
+                "xp_hide" -> {
+                    AppManager.mBlackBoxLoader.invalidHideXposed(tmpHide)
+                }
+
+                "root_hide" -> {
+
+                    AppManager.mBlackBoxLoader.invalidHideRoot(tmpHide)
+                }
+
+                "daemon_enable" -> {
+                    AppManager.mBlackBoxLoader.invalidDaemonEnable(tmpHide)
+                }
             }
+
+            toast(R.string.restart_module)
             return@setOnPreferenceChangeListener true
         }
     }

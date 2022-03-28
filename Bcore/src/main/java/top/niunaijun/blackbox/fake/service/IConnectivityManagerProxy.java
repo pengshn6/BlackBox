@@ -5,6 +5,7 @@ import android.content.Context;
 import black.android.net.BRIConnectivityManagerStub;
 import black.android.os.BRServiceManager;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
+import top.niunaijun.blackbox.fake.hook.ScanClass;
 
 /**
  * Created by Milk on 4/12/21.
@@ -14,7 +15,10 @@ import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
  * しーＪ
  * 此处无Bug
  */
+@ScanClass(VpnCommonProxy.class)
 public class IConnectivityManagerProxy extends BinderInvocationStub {
+    public static final String TAG = "IConnectivityManagerProxy";
+
     public IConnectivityManagerProxy() {
         super(BRServiceManager.get().getService(Context.CONNECTIVITY_SERVICE));
     }
@@ -32,10 +36,5 @@ public class IConnectivityManagerProxy extends BinderInvocationStub {
     @Override
     public boolean isBadEnv() {
         return false;
-    }
-
-    @Override
-    protected void onBindMethod() {
-        super.onBindMethod();
     }
 }

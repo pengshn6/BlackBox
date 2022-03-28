@@ -1,5 +1,6 @@
 package top.niunaijun.blackboxa.view.main
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -12,16 +13,19 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.input.input
 import top.niunaijun.blackbox.BlackBoxCore
 import top.niunaijun.blackboxa.R
+import top.niunaijun.blackboxa.app.App
 import top.niunaijun.blackboxa.app.AppManager
 import top.niunaijun.blackboxa.databinding.ActivityMainBinding
+import top.niunaijun.blackboxa.util.Resolution
 import top.niunaijun.blackboxa.util.inflate
 import top.niunaijun.blackboxa.view.apps.AppsFragment
-import top.niunaijun.blackboxa.view.base.BaseActivity
+import top.niunaijun.blackboxa.view.base.LoadingActivity
+import top.niunaijun.blackboxa.view.fake.FakeManagerActivity
 import top.niunaijun.blackboxa.view.list.ListActivity
 import top.niunaijun.blackboxa.view.setting.SettingActivity
 
 
-class MainActivity : BaseActivity() {
+class MainActivity : LoadingActivity() {
 
     private val viewBinding: ActivityMainBinding by inflate()
 
@@ -81,6 +85,7 @@ class MainActivity : BaseActivity() {
                 super.onPageSelected(position)
                 currentUser = fragmentList[position].userID
                 updateUserRemark(currentUser)
+                showFloatButton(true)
             }
         })
 
@@ -90,8 +95,20 @@ class MainActivity : BaseActivity() {
         viewBinding.fab.setOnClickListener {
             val userId = viewBinding.viewPager.currentItem
             val intent = Intent(this, ListActivity::class.java)
-            intent.putExtra("userId", userId)
+            intent.putExtra("userID", userId)
             apkPathResult.launch(intent)
+        }
+    }
+
+    fun showFloatButton(show: Boolean) {
+        val tranY: Float = Resolution.convertDpToPixel(120F, App.getContext())
+        val time = 200L
+        if (show) {
+            viewBinding.fab.animate().translationY(0f).alpha(1f).setDuration(time)
+                .start()
+        } else {
+            viewBinding.fab.animate().translationY(tranY).alpha(0f).setDuration(time)
+                .start()
         }
     }
 
@@ -121,7 +138,7 @@ class MainActivity : BaseActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
                 it.data?.let { data ->
-                    val userId = data.getIntExtra("userId", 0)
+                    val userId = data.getIntExtra("userID", 0)
                     val source = data.getStringExtra("source")
                     if (source != null) {
                         fragmentList[userId].installApk(source)
@@ -145,8 +162,7 @@ class MainActivity : BaseActivity() {
             }
 
             R.id.main_setting -> {
-                val intent = Intent(this, SettingActivity::class.java)
-                startActivity(intent)
+                SettingActivity.start(this)
             }
 
             R.id.main_tg -> {
@@ -154,10 +170,23 @@ class MainActivity : BaseActivity() {
                     Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/fvblackbox"))
                 startActivity(intent)
             }
+
+            R.id.fake_location -> {
+//                toast("Still Developing")
+                val intent = Intent(this, FakeManagerActivity::class.java)
+                intent.putExtra("userID", 0)
+                startActivity(intent)
+            }
         }
 
         return true
     }
 
+    companion object {
+        fun start(context: Context) {
+            val intent = Intent(context, MainActivity::class.java)
+            context.startActivity(intent)
+        }
+    }
 
 }

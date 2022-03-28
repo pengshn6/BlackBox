@@ -6,8 +6,11 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
+import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.app.dispatcher.AppServiceDispatcher;
+import top.niunaijun.blackbox.utils.compat.BuildCompat;
 
 /**
  * Created by Milk on 3/30/21.
@@ -60,6 +63,14 @@ public class ProxyService extends Service {
     public boolean onUnbind(Intent intent) {
         AppServiceDispatcher.get().onUnbind(intent);
         return false;
+    }
+
+    private void showNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), getPackageName() + ".blackbox_proxy")
+                .setPriority(NotificationCompat.PRIORITY_MAX);
+        if (BuildCompat.isOreo()) {
+            startForeground(BlackBoxCore.getHostPkg().hashCode(), builder.build());
+        }
     }
 
     public static class P0 extends ProxyService {
@@ -259,206 +270,6 @@ public class ProxyService extends Service {
     }
 
     public static class P49 extends ProxyService {
-
-    }
-
-    public static class P50 extends ProxyService {
-
-    }
-
-    public static class P51 extends ProxyService {
-
-    }
-
-    public static class P52 extends ProxyService {
-
-    }
-
-    public static class P53 extends ProxyService {
-
-    }
-
-    public static class P54 extends ProxyService {
-
-    }
-
-    public static class P55 extends ProxyService {
-
-    }
-
-    public static class P56 extends ProxyService {
-
-    }
-
-    public static class P57 extends ProxyService {
-
-    }
-
-    public static class P58 extends ProxyService {
-
-    }
-
-    public static class P59 extends ProxyService {
-
-    }
-
-    public static class P60 extends ProxyService {
-
-    }
-
-    public static class P61 extends ProxyService {
-
-    }
-
-    public static class P62 extends ProxyService {
-
-    }
-
-    public static class P63 extends ProxyService {
-
-    }
-
-    public static class P64 extends ProxyService {
-
-    }
-
-    public static class P65 extends ProxyService {
-
-    }
-
-    public static class P66 extends ProxyService {
-
-    }
-
-    public static class P67 extends ProxyService {
-
-    }
-
-    public static class P68 extends ProxyService {
-
-    }
-
-    public static class P69 extends ProxyService {
-
-    }
-
-    public static class P70 extends ProxyService {
-
-    }
-
-    public static class P71 extends ProxyService {
-
-    }
-
-    public static class P72 extends ProxyService {
-
-    }
-
-    public static class P73 extends ProxyService {
-
-    }
-
-    public static class P74 extends ProxyService {
-
-    }
-
-    public static class P75 extends ProxyService {
-
-    }
-
-    public static class P76 extends ProxyService {
-
-    }
-
-    public static class P77 extends ProxyService {
-
-    }
-
-    public static class P78 extends ProxyService {
-
-    }
-
-    public static class P79 extends ProxyService {
-
-    }
-
-    public static class P80 extends ProxyService {
-
-    }
-
-    public static class P81 extends ProxyService {
-
-    }
-
-    public static class P82 extends ProxyService {
-
-    }
-
-    public static class P83 extends ProxyService {
-
-    }
-
-    public static class P84 extends ProxyService {
-
-    }
-
-    public static class P85 extends ProxyService {
-
-    }
-
-    public static class P86 extends ProxyService {
-
-    }
-
-    public static class P87 extends ProxyService {
-
-    }
-
-    public static class P88 extends ProxyService {
-
-    }
-
-    public static class P89 extends ProxyService {
-
-    }
-
-    public static class P90 extends ProxyService {
-
-    }
-
-    public static class P91 extends ProxyService {
-
-    }
-
-    public static class P92 extends ProxyService {
-
-    }
-
-    public static class P93 extends ProxyService {
-
-    }
-
-    public static class P94 extends ProxyService {
-
-    }
-
-    public static class P95 extends ProxyService {
-
-    }
-
-    public static class P96 extends ProxyService {
-
-    }
-
-    public static class P97 extends ProxyService {
-
-    }
-
-    public static class P98 extends ProxyService {
-
-    }
-
-    public static class P99 extends ProxyService {
 
     }
 }

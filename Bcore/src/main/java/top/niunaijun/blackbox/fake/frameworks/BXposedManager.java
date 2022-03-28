@@ -5,10 +5,9 @@ import android.os.RemoteException;
 import java.util.Collections;
 import java.util.List;
 
-import top.niunaijun.blackbox.BlackBoxCore;
-import top.niunaijun.blackbox.entity.pm.InstalledModule;
 import top.niunaijun.blackbox.core.system.ServiceManager;
 import top.niunaijun.blackbox.core.system.pm.IBXposedManagerService;
+import top.niunaijun.blackbox.entity.pm.InstalledModule;
 
 /**
  * Created by Milk on 5/2/21.
@@ -18,12 +17,16 @@ import top.niunaijun.blackbox.core.system.pm.IBXposedManagerService;
  * しーＪ
  * 此处无Bug
  */
-public class BXposedManager {
+public class BXposedManager extends BlackManager<IBXposedManagerService> {
     private static final BXposedManager sXposedManager = new BXposedManager();
-    private IBXposedManagerService mService;
 
     public static BXposedManager get() {
         return sXposedManager;
+    }
+
+    @Override
+    protected String getServiceName() {
+        return ServiceManager.XPOSED_MANAGER;
     }
 
     public boolean isXPEnable() {
@@ -67,13 +70,5 @@ public class BXposedManager {
             e.printStackTrace();
         }
         return Collections.emptyList();
-    }
-
-    private IBXposedManagerService getService() {
-        if (mService != null && mService.asBinder().isBinderAlive()) {
-            return mService;
-        }
-        mService = IBXposedManagerService.Stub.asInterface(BlackBoxCore.get().getService(ServiceManager.XPOSED_MANAGER));
-        return getService();
     }
 }

@@ -451,7 +451,11 @@ public class BPackage implements Parcelable {
         }
 
         public SigningDetails(PackageParser.SigningDetails signingDetails) {
-            this.signatures = signingDetails.signatures;
+            if (signingDetails.pastSigningCertificates == null) {
+                this.signatures = signingDetails.signatures;
+            } else {
+                this.signatures = signingDetails.pastSigningCertificates;
+            }
         }
 
         protected SigningDetails(Parcel in) {

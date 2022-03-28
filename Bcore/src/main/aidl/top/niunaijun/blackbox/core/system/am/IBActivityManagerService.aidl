@@ -11,6 +11,9 @@ import android.app.IServiceConnection;
 import top.niunaijun.blackbox.entity.AppConfig;
 import top.niunaijun.blackbox.entity.UnbindRecord;
 import android.os.Bundle;
+import top.niunaijun.blackbox.entity.am.RunningAppProcessInfo;
+import top.niunaijun.blackbox.entity.am.PendingResultData;
+import top.niunaijun.blackbox.entity.am.RunningServiceInfo;
 
 // Declare any non-default types here with import statements
 
@@ -22,11 +25,13 @@ interface IBActivityManagerService {
     int startActivityAms(int userId, in Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode, int flags, in Bundle options);
     int startActivities(int userId, in Intent[] intent, in String[] resolvedType, IBinder resultTo, in Bundle options);
 
-    ComponentName startService(in Intent intent, String resolvedType, int userId);
+    ComponentName startService(in Intent intent, String resolvedType, boolean requireForeground, int userId);
     int stopService(in Intent intent,in String resolvedType, int userId);
 
     Intent bindService(in Intent service, in IBinder binder, String resolvedType, int userId);
     void unbindService(in IBinder binder, int userId);
+
+    void stopServiceToken(in ComponentName className, in IBinder token, int userId);
 
     void onStartCommand(in Intent proxyIntent, int userId);
     UnbindRecord onServiceUnbind(in Intent proxyIntent, int userId);
@@ -40,4 +45,17 @@ interface IBActivityManagerService {
     void onActivityResumed(IBinder token);
     void onActivityDestroyed(IBinder token);
     void onFinishActivity(IBinder token);
+
+    RunningAppProcessInfo getRunningAppProcesses(String callerPackage, int userId);
+    RunningServiceInfo getRunningServices(String callerPackage, int userId);
+
+    void scheduleBroadcastReceiver(in Intent intent, in PendingResultData pendingResultData, int userId);
+    void finishBroadcast(in PendingResultData data);
+
+    String getCallingPackage(in IBinder token, int userId);
+    ComponentName getCallingActivity(in IBinder token, int userId);
+
+    void getIntentSender(in IBinder target, String packageName, int uid, int userId);
+    String getPackageForIntentSender(in IBinder target, int userId);
+    int getUidForIntentSender(in IBinder target, int userId);
 }

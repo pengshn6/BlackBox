@@ -2,7 +2,6 @@ package top.niunaijun.blackbox.utils.compat;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Process;
 
 import black.android.app.BRContextImpl;
 import black.android.app.BRContextImplKitkat;
@@ -24,15 +23,15 @@ import top.niunaijun.blackbox.app.BActivityThread;
 public class ContextCompat {
     public static final String TAG = "ContextCompat";
 
-    public static void fixAttributionSourceState(Object obj) {
+    public static void fixAttributionSourceState(Object obj, int uid) {
         Object mAttributionSourceState;
         if (obj != null && BRAttributionSource.get(obj)._check_mAttributionSourceState() != null) {
             mAttributionSourceState = BRAttributionSource.get(obj).mAttributionSourceState();
 
             AttributionSourceStateContext attributionSourceStateContext = BRAttributionSourceState.get(mAttributionSourceState);
             attributionSourceStateContext._set_packageName(BlackBoxCore.getHostPkg());
-            attributionSourceStateContext._set_uid(Process.myUid());
-            fixAttributionSourceState(BRAttributionSource.get(obj).getNext());
+            attributionSourceStateContext._set_uid(uid);
+            fixAttributionSourceState(BRAttributionSource.get(obj).getNext(), uid);
         }
     }
 
@@ -58,7 +57,7 @@ public class ContextCompat {
             BRContentResolver.get(context.getContentResolver())._set_mPackageName(BlackBoxCore.getHostPkg());
 
             if (BuildCompat.isS()) {
-                fixAttributionSourceState(BRContextImpl.get(context).getAttributionSource());
+                fixAttributionSourceState(BRContextImpl.get(context).getAttributionSource(), BActivityThread.getBUid());
             }
         } catch (Exception e) {
             e.printStackTrace();

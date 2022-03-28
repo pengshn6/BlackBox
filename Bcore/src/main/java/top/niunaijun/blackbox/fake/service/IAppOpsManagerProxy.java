@@ -3,13 +3,11 @@ package top.niunaijun.blackbox.fake.service;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.os.IBinder;
-import android.os.IInterface;
 
 import java.lang.reflect.Method;
 
 import black.android.app.BRAppOpsManager;
 import black.android.os.BRServiceManager;
-import black.com.android.internal.app.BRIAppOpsService;
 import black.com.android.internal.app.BRIAppOpsServiceStub;
 import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
@@ -52,7 +50,7 @@ public class IAppOpsManagerProxy extends BinderInvocationStub {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         MethodParameterUtils.replaceFirstAppPkg(args);
-        MethodParameterUtils.replaceLastUserId(args);
+        MethodParameterUtils.replaceLastUid(args);
         return super.invoke(proxy, method, args);
     }
 
@@ -61,7 +59,15 @@ public class IAppOpsManagerProxy extends BinderInvocationStub {
         return false;
     }
 
-    @ProxyMethod(name = "checkPackage")
+    @ProxyMethod("noteProxyOperation")
+    public static class NoteProxyOperation extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            return AppOpsManager.MODE_ALLOWED;
+        }
+    }
+
+    @ProxyMethod("checkPackage")
     public static class CheckPackage extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -70,15 +76,16 @@ public class IAppOpsManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "checkPackage")
+    @ProxyMethod("checkOperation")
     public static class CheckOperation extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            MethodParameterUtils.replaceLastUid(args);
             return method.invoke(who, args);
         }
     }
 
-    @ProxyMethod(name = "noteOperation")
+    @ProxyMethod("noteOperation")
     public static class NoteOperation extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {

@@ -1,11 +1,8 @@
 package top.niunaijun.blackbox.core.system.pm;
 
-import android.os.RemoteException;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.core.system.ISystemService;
 import top.niunaijun.blackbox.core.system.pm.installer.CopyExecutor;
 import top.niunaijun.blackbox.core.system.pm.installer.CreatePackageExecutor;
@@ -13,6 +10,7 @@ import top.niunaijun.blackbox.core.system.pm.installer.CreateUserExecutor;
 import top.niunaijun.blackbox.core.system.pm.installer.Executor;
 import top.niunaijun.blackbox.core.system.pm.installer.RemoveAppExecutor;
 import top.niunaijun.blackbox.core.system.pm.installer.RemoveUserExecutor;
+import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.utils.Slog;
 
 /**
@@ -98,7 +96,6 @@ public class BPackageInstallerService extends IBPackageInstallerService.Stub imp
         InstallOption option = ps.installOption;
         for (Executor executor : executors) {
             int exec = executor.exec(ps, option, -1);
-            Slog.d(TAG, "updatePackage: " + executor.getClass().getSimpleName() + " exec: " + exec);
             if (exec != 0) {
                 return exec;
             }

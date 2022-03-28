@@ -5,37 +5,50 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.Map;
 
+import top.niunaijun.blackbox.BlackBoxCore;
+import top.niunaijun.blackbox.fake.delegate.AppInstrumentation;
+import top.niunaijun.blackbox.fake.service.HCallbackProxy;
 import top.niunaijun.blackbox.fake.service.IAccessibilityManagerProxy;
 import top.niunaijun.blackbox.fake.service.IAccountManagerProxy;
 import top.niunaijun.blackbox.fake.service.IActivityClientProxy;
 import top.niunaijun.blackbox.fake.service.IActivityManagerProxy;
 import top.niunaijun.blackbox.fake.service.IActivityTaskManagerProxy;
-import top.niunaijun.blackbox.fake.service.HCallbackProxy;
 import top.niunaijun.blackbox.fake.service.IAlarmManagerProxy;
 import top.niunaijun.blackbox.fake.service.IAppOpsManagerProxy;
+import top.niunaijun.blackbox.fake.service.IAppWidgetManagerProxy;
+import top.niunaijun.blackbox.fake.service.IAutofillManagerProxy;
+import top.niunaijun.blackbox.fake.service.IConnectivityManagerProxy;
+import top.niunaijun.blackbox.fake.service.IContextHubServiceProxy;
+import top.niunaijun.blackbox.fake.service.IDeviceIdentifiersPolicyProxy;
 import top.niunaijun.blackbox.fake.service.IDevicePolicyManagerProxy;
+import top.niunaijun.blackbox.fake.service.IDisplayManagerProxy;
+import top.niunaijun.blackbox.fake.service.IGraphicsStatsProxy;
 import top.niunaijun.blackbox.fake.service.IJobServiceProxy;
+import top.niunaijun.blackbox.fake.service.ILauncherAppsProxy;
+import top.niunaijun.blackbox.fake.service.ILocationManagerProxy;
+import top.niunaijun.blackbox.fake.service.IMediaRouterServiceProxy;
+import top.niunaijun.blackbox.fake.service.IMediaSessionManagerProxy;
+import top.niunaijun.blackbox.fake.service.INetworkManagementServiceProxy;
 import top.niunaijun.blackbox.fake.service.INotificationManagerProxy;
+import top.niunaijun.blackbox.fake.service.IPackageManagerProxy;
+import top.niunaijun.blackbox.fake.service.IPermissionManagerProxy;
+import top.niunaijun.blackbox.fake.service.IPersistentDataBlockServiceProxy;
+import top.niunaijun.blackbox.fake.service.IPhoneSubInfoProxy;
+import top.niunaijun.blackbox.fake.service.IPowerManagerProxy;
+import top.niunaijun.blackbox.fake.service.IShortcutManagerProxy;
+import top.niunaijun.blackbox.fake.service.IStorageManagerProxy;
+import top.niunaijun.blackbox.fake.service.IStorageStatsManagerProxy;
+import top.niunaijun.blackbox.fake.service.ITelephonyManagerProxy;
 import top.niunaijun.blackbox.fake.service.ITelephonyRegistryProxy;
+import top.niunaijun.blackbox.fake.service.IUserManagerProxy;
+import top.niunaijun.blackbox.fake.service.IVibratorServiceProxy;
+import top.niunaijun.blackbox.fake.service.IVpnManagerProxy;
+import top.niunaijun.blackbox.fake.service.IWifiManagerProxy;
+import top.niunaijun.blackbox.fake.service.IWindowManagerProxy;
 import top.niunaijun.blackbox.fake.service.context.ContentServiceStub;
 import top.niunaijun.blackbox.fake.service.context.RestrictionsManagerStub;
-import top.niunaijun.blackbox.fake.service.IDisplayManagerProxy;
-import top.niunaijun.blackbox.fake.service.IDeviceIdentifiersPolicyProxy;
-import top.niunaijun.blackbox.fake.service.IUserManagerProxy;
-import top.niunaijun.blackbox.fake.service.IStorageManagerProxy;
-import top.niunaijun.blackbox.fake.service.ILauncherAppsProxy;
-import top.niunaijun.blackbox.fake.service.IPackageManagerProxy;
-import top.niunaijun.blackbox.fake.service.IShortcutManagerProxy;
-import top.niunaijun.blackbox.fake.service.IAutofillManagerProxy;
-import top.niunaijun.blackbox.fake.service.IGraphicsStatsProxy;
-import top.niunaijun.blackbox.fake.service.IWindowManagerProxy;
-import top.niunaijun.blackbox.BlackBoxCore;
-import top.niunaijun.blackbox.fake.delegate.AppInstrumentation;
-import top.niunaijun.blackbox.fake.service.IAppWidgetManagerProxy;
 import top.niunaijun.blackbox.fake.service.libcore.OsStub;
-import top.niunaijun.blackbox.fake.service.ILocationManagerProxy;
-import top.niunaijun.blackbox.fake.service.IMediaSessionManagerProxy;
-import top.niunaijun.blackbox.fake.service.ITelephonyManagerProxy;
+import top.niunaijun.blackbox.utils.Slog;
 import top.niunaijun.blackbox.utils.compat.BuildCompat;
 
 /**
@@ -58,7 +71,7 @@ public class HookManager {
     }
 
     public void init() {
-        if (BlackBoxCore.get().isVirtualProcess()) {
+        if (BlackBoxCore.get().isBlackProcess() || BlackBoxCore.get().isServerProcess()) {
             addInjector(new IDisplayManagerProxy());
             addInjector(new OsStub());
             addInjector(new IActivityManagerProxy());
@@ -82,11 +95,30 @@ public class HookManager {
             addInjector(new ITelephonyRegistryProxy());
             addInjector(new IDevicePolicyManagerProxy());
             addInjector(new IAccountManagerProxy());
+            addInjector(new IConnectivityManagerProxy());
+            addInjector(new IPhoneSubInfoProxy());
+            addInjector(new IMediaRouterServiceProxy());
+            addInjector(new IPowerManagerProxy());
+            addInjector(new IContextHubServiceProxy());
+            addInjector(new IVibratorServiceProxy());
+            addInjector(new IPersistentDataBlockServiceProxy());
 
             addInjector(AppInstrumentation.get());
+            /*
+            * It takes time to test and enhance the compatibility of WifiManager
+            * (only tested in Android 10).
+            * commented by BlackBoxing at 2022/03/08
+            * */
+            addInjector(new IWifiManagerProxy());
 
+            // 12.0
+            if (BuildCompat.isS()) {
+                addInjector(new IActivityClientProxy(null));
+                addInjector(new IVpnManagerProxy());
+            }
             // 11.0
             if (BuildCompat.isR()) {
+                addInjector(new IPermissionManagerProxy());
             }
             // 10.0
             if (BuildCompat.isQ()) {
@@ -99,6 +131,7 @@ public class HookManager {
             if (BuildCompat.isOreo()) {
                 addInjector(new IAutofillManagerProxy());
                 addInjector(new IDeviceIdentifiersPolicyProxy());
+                addInjector(new IStorageStatsManagerProxy());
             }
             // 7.1
             if (BuildCompat.isN_MR1()) {
@@ -106,6 +139,7 @@ public class HookManager {
             }
             // 7.0
             if (BuildCompat.isN()) {
+                addInjector(new INetworkManagementServiceProxy());
             }
             // 6.0
             if (BuildCompat.isM()) {
@@ -114,9 +148,6 @@ public class HookManager {
             // 5.0
             if (BuildCompat.isL()) {
                 addInjector(new IJobServiceProxy());
-            }
-            if (BuildCompat.isS()) {
-                addInjector(new IActivityClientProxy(null));
             }
         }
         injectAll();
@@ -130,6 +161,16 @@ public class HookManager {
         }
     }
 
+    public void checkAll() {
+        for (Class<?> aClass : mInjectors.keySet()) {
+            IInjectHook iInjectHook = mInjectors.get(aClass);
+            if (iInjectHook != null && iInjectHook.isBadEnv()) {
+                Log.d(TAG, "checkEnv: " + aClass.getSimpleName() + " is bad env");
+                iInjectHook.injectHook();
+            }
+        }
+    }
+
     void addInjector(IInjectHook injectHook) {
         mInjectors.put(injectHook.getClass(), injectHook);
     }
@@ -137,9 +178,10 @@ public class HookManager {
     void injectAll() {
         for (IInjectHook value : mInjectors.values()) {
             try {
+                Slog.d(TAG, "hook: " + value);
                 value.injectHook();
             } catch (Exception e) {
-                e.printStackTrace();
+                Slog.d(TAG, "hook error: " + value);
             }
         }
     }

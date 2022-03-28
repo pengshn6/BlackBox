@@ -9,7 +9,6 @@ import black.android.os.BRServiceManager;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
-import top.niunaijun.blackbox.utils.MethodParameterUtils;
 
 /**
  * Created by Milk on 4/3/21.
@@ -35,12 +34,11 @@ public class IAlarmManagerProxy extends BinderInvocationStub {
         replaceSystemService(Context.ALARM_SERVICE);
     }
 
-    @ProxyMethod(name = "set")
+    @ProxyMethod("set")
     public static class Set extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
-            MethodParameterUtils.replaceFirstAppPkg(args);
-            return method.invoke(who, args);
+            return 0;
         }
     }
 

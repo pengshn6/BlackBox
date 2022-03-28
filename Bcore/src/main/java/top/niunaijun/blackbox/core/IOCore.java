@@ -7,19 +7,17 @@ import android.content.pm.PackageManager;
 import android.os.Process;
 import android.text.TextUtils;
 
-import black.android.os.BRUserHandle;
-import black.android.os.UserHandle;
-import top.niunaijun.blackbox.BlackBoxCore;
-import top.niunaijun.blackbox.app.BActivityThread;
-import top.niunaijun.blackbox.core.env.BEnvironment;
-import top.niunaijun.blackbox.utils.FileUtils;
-import top.niunaijun.blackbox.utils.TrieTree;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import top.niunaijun.blackbox.BlackBoxCore;
+import top.niunaijun.blackbox.app.BActivityThread;
+import top.niunaijun.blackbox.core.env.BEnvironment;
+import top.niunaijun.blackbox.utils.FileUtils;
+import top.niunaijun.blackbox.utils.TrieTree;
 
 /**
  * Created by Milk on 4/9/21.
@@ -54,7 +52,7 @@ public class IOCore {
         if (!redirectFile.exists()) {
             FileUtils.mkdirs(redirectPath);
         }
-        VMCore.addIORule(origPath, redirectPath);
+        NativeCore.addIORule(origPath, redirectPath);
     }
 
     public String redirectPath(String path) {
@@ -105,7 +103,7 @@ public class IOCore {
 
         try {
             ApplicationInfo packageInfo = BlackBoxCore.getBPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA, BActivityThread.getUserId());
-            int systemUserId = BRUserHandle.get().myUserId();
+            int systemUserId = BlackBoxCore.getHostUserId();
             rule.put(String.format("/data/data/%s/lib", packageName), packageInfo.nativeLibraryDir);
             rule.put(String.format("/data/user/%d/%s/lib", systemUserId, packageName), packageInfo.nativeLibraryDir);
 
@@ -129,7 +127,7 @@ public class IOCore {
         for (String key : rule.keySet()) {
             get().addRedirect(key, rule.get(key));
         }
-        VMCore.enableIO();
+        NativeCore.enableIO();
     }
 
     private void hideRoot(Map<String, String> rule) {

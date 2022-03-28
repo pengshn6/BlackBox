@@ -2,58 +2,61 @@ package top.niunaijun.blackbox;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Process;
 
-import androidx.annotation.RequiresApi;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import black.android.app.BRActivityThread;
+import black.android.os.BRUserHandle;
+import me.weishu.reflection.Reflection;
 import top.canyie.pine.PineConfig;
 import top.niunaijun.blackbox.app.LauncherActivity;
-import top.niunaijun.blackbox.app.configuration.ClientConfiguration;
-import top.niunaijun.blackbox.core.env.BEnvironment;
-import top.niunaijun.blackbox.proxy.ProxyManifest;
-import top.niunaijun.blackbox.fake.frameworks.BUserManager;
-import top.niunaijun.blackbox.fake.frameworks.BXposedManager;
 import top.niunaijun.blackbox.app.configuration.AppLifecycleCallback;
-import top.niunaijun.blackbox.fake.hook.HookManager;
+import top.niunaijun.blackbox.app.configuration.ClientConfiguration;
+import top.niunaijun.blackbox.core.GmsCore;
+import top.niunaijun.blackbox.core.env.BEnvironment;
+import top.niunaijun.blackbox.core.system.DaemonService;
+import top.niunaijun.blackbox.core.system.ServiceManager;
+import top.niunaijun.blackbox.core.system.user.BUserHandle;
+import top.niunaijun.blackbox.core.system.user.BUserInfo;
 import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.entity.pm.InstallResult;
 import top.niunaijun.blackbox.entity.pm.InstalledModule;
-import top.niunaijun.blackbox.core.system.DaemonService;
-import top.niunaijun.blackbox.core.system.user.BUserHandle;
-import top.niunaijun.blackbox.core.system.user.BUserInfo;
+import top.niunaijun.blackbox.fake.delegate.ContentProviderDelegate;
+import top.niunaijun.blackbox.fake.frameworks.BActivityManager;
+import top.niunaijun.blackbox.fake.frameworks.BJobManager;
+import top.niunaijun.blackbox.fake.frameworks.BPackageManager;
+import top.niunaijun.blackbox.fake.frameworks.BStorageManager;
+import top.niunaijun.blackbox.fake.frameworks.BUserManager;
+import top.niunaijun.blackbox.fake.frameworks.BXposedManager;
+import top.niunaijun.blackbox.fake.hook.HookManager;
+import top.niunaijun.blackbox.proxy.ProxyManifest;
 import top.niunaijun.blackbox.utils.FileUtils;
 import top.niunaijun.blackbox.utils.ShellUtils;
 import top.niunaijun.blackbox.utils.compat.BuildCompat;
 import top.niunaijun.blackbox.utils.compat.BundleCompat;
 import top.niunaijun.blackbox.utils.compat.XposedParserCompat;
 import top.niunaijun.blackbox.utils.provider.ProviderCall;
-import top.niunaijun.blackbox.fake.frameworks.BActivityManager;
-import top.niunaijun.blackbox.fake.frameworks.BJobManager;
-import top.niunaijun.blackbox.fake.frameworks.BPackageManager;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
-import me.weishu.reflection.Reflection;
-import top.niunaijun.blackbox.fake.frameworks.BStorageManager;
-import top.niunaijun.blackbox.fake.delegate.ContentProviderDelegate;
-import top.niunaijun.blackbox.core.system.ServiceManager;
 
 /**
  * Created by Milk on 3/30/21.
@@ -74,9 +77,16 @@ public class BlackBoxCore extends ClientConfiguration {
     private Thread.UncaughtExceptionHandler mExceptionHandler;
     private ClientConfiguration mClientConfiguration;
     private final List<AppLifecycleCallback> mAppLifecycleCallbacks = new ArrayList<>();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private final int mHostUid = Process.myUid();
+    private final int mHostUserId = BRUserHandle.get().myUserId();
 
     public static BlackBoxCore get() {
         return sBlackBoxCore;
+    }
+
+    public Handler getHandler() {
+        return mHandler;
     }
 
     public static PackageManager getPackageManager() {
@@ -85,6 +95,14 @@ public class BlackBoxCore extends ClientConfiguration {
 
     public static String getHostPkg() {
         return get().getHostPackageName();
+    }
+
+    public static int getHostUid() {
+        return get().mHostUid;
+    }
+
+    public static int getHostUserId() {
+        return get().mHostUserId;
     }
 
     public static Context getContext() {
@@ -106,6 +124,8 @@ public class BlackBoxCore extends ClientConfiguration {
         Reflection.unseal(context);
         sContext = context;
         mClientConfiguration = clientConfiguration;
+        initNotificationManager();
+
         String processName = getProcessName(getContext());
         if (processName.equals(BlackBoxCore.getHostPkg())) {
             mProcessType = ProcessType.Main;
@@ -115,7 +135,7 @@ public class BlackBoxCore extends ClientConfiguration {
         } else {
             mProcessType = ProcessType.BAppClient;
         }
-        if (BlackBoxCore.get().isVirtualProcess()) {
+        if (BlackBoxCore.get().isBlackProcess()) {
             BEnvironment.load();
             if (processName.endsWith("p0")) {
 //                android.os.Debug.waitForDebugger();
@@ -140,19 +160,12 @@ public class BlackBoxCore extends ClientConfiguration {
 
     public void doCreate() {
         // fix contentProvider
-        if (isVirtualProcess()) {
+        if (isBlackProcess()) {
             ContentProviderDelegate.init();
         }
         if (!isServerProcess()) {
-            initService();
+            ServiceManager.initBlackManager();
         }
-    }
-
-    private void initService() {
-        get().getService(ServiceManager.ACTIVITY_MANAGER);
-        get().getService(ServiceManager.PACKAGE_MANAGER);
-        get().getService(ServiceManager.STORAGE_MANAGER);
-        get().getService(ServiceManager.JOB_MANAGER);
     }
 
     public static Object mainThread() {
@@ -160,7 +173,11 @@ public class BlackBoxCore extends ClientConfiguration {
     }
 
     public void startActivity(Intent intent, int userId) {
-        LauncherActivity.launch(intent, userId);
+        if (mClientConfiguration.isEnableLauncherActivity()) {
+            LauncherActivity.launch(intent, userId);
+        } else {
+            getBActivityManager().startActivity(intent, userId);
+        }
     }
 
     public static BJobManager getBJobManager() {
@@ -311,16 +328,33 @@ public class BlackBoxCore extends ClientConfiguration {
         mAppLifecycleCallbacks.add(appLifecycleCallback);
     }
 
+    public boolean isSupportGms() {
+        return GmsCore.isSupportGms();
+    }
+
+    public boolean isInstallGms(int userId) {
+        return GmsCore.isInstalledGoogleService(userId);
+    }
+
+    public InstallResult installGms(int userId) {
+        return GmsCore.installGApps(userId);
+    }
+
+    public boolean uninstallGms(int userId) {
+        GmsCore.uninstallGApps(userId);
+        return !GmsCore.isInstalledGoogleService(userId);
+    }
+
     public IBinder getService(String name) {
         IBinder binder = mServices.get(name);
         if (binder != null && binder.isBinderAlive()) {
             return binder;
         }
         Bundle bundle = new Bundle();
-        bundle.putString("_VM_|_server_name_", name);
+        bundle.putString("_B_|_server_name_", name);
         Bundle vm = ProviderCall.callSafely(ProxyManifest.getBindProvider(), "VM", null, bundle);
         assert vm != null;
-        binder = BundleCompat.getBinder(vm, "_VM_|_server_");
+        binder = BundleCompat.getBinder(vm, "_B_|_server_");
         mServices.put(name, binder);
         return binder;
     }
@@ -334,7 +368,7 @@ public class BlackBoxCore extends ClientConfiguration {
          */
         Server,
         /**
-         * Virtual app process
+         * Black app process
          */
         BAppClient,
         /**
@@ -343,7 +377,7 @@ public class BlackBoxCore extends ClientConfiguration {
         Main,
     }
 
-    public boolean isVirtualProcess() {
+    public boolean isBlackProcess() {
         return mProcessType == ProcessType.BAppClient;
     }
 
@@ -368,6 +402,11 @@ public class BlackBoxCore extends ClientConfiguration {
     @Override
     public String getHostPackageName() {
         return mClientConfiguration.getHostPackageName();
+    }
+
+    @Override
+    public boolean requestInstallPackage(File file) {
+        return mClientConfiguration.requestInstallPackage(file);
     }
 
     private void startLogcat() {
@@ -398,6 +437,21 @@ public class BlackBoxCore extends ClientConfiguration {
             return Process.is64Bit();
         } else {
             return Build.CPU_ABI.equals("arm64-v8a");
+        }
+    }
+
+    private void initNotificationManager() {
+        NotificationManager nm = (NotificationManager) BlackBoxCore.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        String CHANNEL_ONE_ID = BlackBoxCore.getContext().getPackageName() + ".blackbox_proxy";
+        String CHANNEL_ONE_NAME = "blackbox_proxy";
+        if (BuildCompat.isOreo()) {
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ONE_ID,
+                    CHANNEL_ONE_NAME, NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.setShowBadge(true);
+            notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            nm.createNotificationChannel(notificationChannel);
         }
     }
 }

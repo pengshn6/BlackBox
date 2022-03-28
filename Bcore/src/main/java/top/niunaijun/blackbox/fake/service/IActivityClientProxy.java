@@ -1,18 +1,17 @@
 package top.niunaijun.blackbox.fake.service;
 
+import android.app.ActivityManager;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.util.Log;
 
 import java.lang.reflect.Method;
 
 import black.android.app.BRActivityClient;
 import black.android.util.BRSingleton;
-import black.android.util.SingletonContext;
 import top.niunaijun.blackbox.fake.frameworks.BActivityManager;
 import top.niunaijun.blackbox.fake.hook.ClassInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
+import top.niunaijun.blackbox.utils.compat.TaskDescriptionCompat;
 
 /**
  * Created by BlackBox on 2022/2/22.
@@ -57,7 +56,7 @@ public class IActivityClientProxy extends ClassInvocationStub {
         super.onlyProxy(o);
     }
 
-    @ProxyMethod(name = "finishActivity")
+    @ProxyMethod("finishActivity")
     public static class FinishActivity extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -67,7 +66,7 @@ public class IActivityClientProxy extends ClassInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "activityResumed")
+    @ProxyMethod("activityResumed")
     public static class ActivityResumed extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
@@ -77,12 +76,23 @@ public class IActivityClientProxy extends ClassInvocationStub {
         }
     }
 
-    @ProxyMethod(name = "activityDestroyed")
+    @ProxyMethod("activityDestroyed")
     public static class ActivityDestroyed extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             IBinder token = (IBinder) args[0];
             BActivityManager.get().onActivityDestroyed(token);
+            return method.invoke(who, args);
+        }
+    }
+
+    // for >= Android 12
+    @ProxyMethod("setTaskDescription")
+    public static class SetTaskDescription extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            ActivityManager.TaskDescription td = (ActivityManager.TaskDescription) args[1];
+            args[1] = TaskDescriptionCompat.fix(td);
             return method.invoke(who, args);
         }
     }

@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import black.android.content.pm.BRParceledListSlice;
-import black.android.content.pm.ParceledListSlice;
 
 public class ParceledListSliceCompat {
 
@@ -16,7 +15,7 @@ public class ParceledListSliceCompat {
 		return obj != null && obj.getClass() == BRParceledListSlice.getRealClass();
 	}
 
-	public static Object create(List list) {
+	public static Object create(List<?> list) {
 		Object slice = BRParceledListSlice.get()._new(list);
 		if (slice != null) {
 			return slice;

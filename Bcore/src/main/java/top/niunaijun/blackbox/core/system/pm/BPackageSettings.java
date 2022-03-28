@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import top.niunaijun.blackbox.core.env.BEnvironment;
-import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.core.system.user.BUserHandle;
+import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.utils.CloseUtils;
 import top.niunaijun.blackbox.utils.FileUtils;
 
@@ -77,12 +77,12 @@ public class BPackageSettings implements Parcelable {
         }
         state = new BPackageUserState(state);
         // xp模块所有用户可见、如果开启的话
-        if (installOption.isFlag(InstallOption.FLAG_Xposed) &&
+        if (installOption.isFlag(InstallOption.FLAG_XPOSED) &&
                 BXposedManagerService.get().isModuleEnable(pkg.packageName) &&
                 BXposedManagerService.get().isXPEnable()) {
             state.installed = true;
         }
-        if (userState.get(BUserHandle.USER_ALL) != null) {
+        if (userId == BUserHandle.USER_ALL) {
             state.installed = true;
         }
         return state;

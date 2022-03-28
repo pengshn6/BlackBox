@@ -23,10 +23,8 @@ import black.android.app.BRActivityThreadActivityClientRecord;
 import black.android.app.BRActivityThreadCreateServiceData;
 import black.android.app.BRActivityThreadH;
 import black.android.app.BRIActivityManager;
-import black.android.app.BRLoadedApk;
 import black.android.app.servertransaction.BRClientTransaction;
 import black.android.app.servertransaction.BRLaunchActivityItem;
-import black.android.app.servertransaction.LaunchActivityItem;
 import black.android.app.servertransaction.LaunchActivityItemContext;
 import black.android.os.BRHandler;
 import top.niunaijun.blackbox.BlackBoxCore;
@@ -207,7 +205,7 @@ public class HCallbackProxy implements IInjectHook, Handler.Callback {
                 Slog.d(TAG, "handleCreateService: " + data);
                 Intent intent = new Intent();
                 intent.setComponent(new ComponentName(appPackageName, serviceInfo.name));
-                BlackBoxCore.getBActivityManager().startService(intent, null, BActivityThread.getUserId());
+                BlackBoxCore.getBActivityManager().startService(intent, null, false, BActivityThread.getUserId());
                 return true;
             }
         }

@@ -3,11 +3,10 @@ package top.niunaijun.blackbox.fake.frameworks;
 import android.app.job.JobInfo;
 import android.os.RemoteException;
 
-import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.app.BActivityThread;
-import top.niunaijun.blackbox.entity.JobRecord;
 import top.niunaijun.blackbox.core.system.ServiceManager;
 import top.niunaijun.blackbox.core.system.am.IBJobManagerService;
+import top.niunaijun.blackbox.entity.JobRecord;
 
 /**
  * Created by Milk on 4/14/21.
@@ -17,14 +16,17 @@ import top.niunaijun.blackbox.core.system.am.IBJobManagerService;
  * しーＪ
  * 此处无Bug
  */
-public class BJobManager {
+public class BJobManager extends BlackManager<IBJobManagerService> {
     private static final BJobManager sJobManager = new BJobManager();
 
     public static BJobManager get() {
         return sJobManager;
     }
 
-    private IBJobManagerService mService;
+    @Override
+    protected String getServiceName() {
+        return ServiceManager.JOB_MANAGER;
+    }
 
     public JobInfo schedule(JobInfo info) {
         try {
@@ -59,13 +61,5 @@ public class BJobManager {
             e.printStackTrace();
         }
         return -1;
-    }
-
-    private IBJobManagerService getService() {
-        if (mService != null && mService.asBinder().isBinderAlive()) {
-            return mService;
-        }
-        mService = IBJobManagerService.Stub.asInterface(BlackBoxCore.get().getService(ServiceManager.JOB_MANAGER));
-        return getService();
     }
 }

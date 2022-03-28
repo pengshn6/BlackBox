@@ -7,6 +7,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     aidlPackageWhiteList "android/app/IServiceConnection.aidl"
+    aidlPackageWhiteList "android/accounts/IAccountManagerResponse.aidl"
 
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -28,6 +29,6 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation project(':Bcore:black-fake')
-    implementation 'com.github.CodingGay.BlackReflection:core:1.0.9'
-    annotationProcessor 'com.github.CodingGay.BlackReflection:compiler:1.0.9'
+    implementation "com.github.CodingGay.BlackReflection:core:$rootProject.ext.blackReflection"
+    annotationProcessor "com.github.CodingGay.BlackReflection:compiler:$rootProject.ext.blackReflection"
 }

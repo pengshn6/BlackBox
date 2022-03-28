@@ -5,20 +5,25 @@ import android.content.pm.PackageManager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import top.niunaijun.blackbox.core.env.BEnvironment;
 import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.core.env.AppSystemEnv;
-import top.niunaijun.blackbox.entity.pm.InstallOption;
+import top.niunaijun.blackbox.core.env.BEnvironment;
+import top.niunaijun.blackbox.core.system.accounts.BAccountManagerService;
 import top.niunaijun.blackbox.core.system.am.BActivityManagerService;
 import top.niunaijun.blackbox.core.system.am.BJobManagerService;
+import top.niunaijun.blackbox.core.system.location.BLocationManagerService;
+import top.niunaijun.blackbox.core.system.notification.BNotificationManagerService;
 import top.niunaijun.blackbox.core.system.os.BStorageManagerService;
 import top.niunaijun.blackbox.core.system.pm.BPackageInstallerService;
 import top.niunaijun.blackbox.core.system.pm.BPackageManagerService;
 import top.niunaijun.blackbox.core.system.pm.BXposedManagerService;
 import top.niunaijun.blackbox.core.system.user.BUserHandle;
 import top.niunaijun.blackbox.core.system.user.BUserManagerService;
+import top.niunaijun.blackbox.entity.pm.InstallOption;
 import top.niunaijun.blackbox.utils.FileUtils;
 
 import static top.niunaijun.blackbox.core.env.BEnvironment.EMPTY_JAR;
@@ -34,6 +39,8 @@ import static top.niunaijun.blackbox.core.env.BEnvironment.JUNIT_JAR;
  */
 public class BlackBoxSystem {
     private static BlackBoxSystem sBlackBoxSystem;
+    private final List<ISystemService> mServices = new ArrayList<>();
+    private final static AtomicBoolean isStartup = new AtomicBoolean(false);
 
     public static BlackBoxSystem getSystem() {
         if (sBlackBoxSystem == null) {
@@ -47,15 +54,25 @@ public class BlackBoxSystem {
     }
 
     public void startup() {
+        if (isStartup.getAndSet(true))
+            return;
         BEnvironment.load();
 
-        BPackageManagerService.get().systemReady();
-        BUserManagerService.get().systemReady();
-        BActivityManagerService.get().systemReady();
-        BJobManagerService.get().systemReady();
-        BStorageManagerService.get().systemReady();
-        BPackageInstallerService.get().systemReady();
-        BXposedManagerService.get().systemReady();
+        mServices.add(BPackageManagerService.get());
+        mServices.add(BUserManagerService.get());
+        mServices.add(BActivityManagerService.get());
+        mServices.add(BJobManagerService.get());
+        mServices.add(BStorageManagerService.get());
+        mServices.add(BPackageInstallerService.get());
+        mServices.add(BXposedManagerService.get());
+        mServices.add(BProcessManagerService.get());
+        mServices.add(BAccountManagerService.get());
+        mServices.add(BLocationManagerService.get());
+        mServices.add(BNotificationManagerService.get());
+
+        for (ISystemService service : mServices) {
+            service.systemReady();
+        }
 
         List<String> preInstallPackages = AppSystemEnv.getPreInstallPackages();
         for (String preInstallPackage : preInstallPackages) {

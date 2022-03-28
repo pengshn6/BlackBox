@@ -72,7 +72,7 @@ public abstract class ClassInvocationStub implements InvocationHandler, IInjectH
     protected void initAnnotation(Class<?> clazz) {
         ProxyMethod proxyMethod = clazz.getAnnotation(ProxyMethod.class);
         if (proxyMethod != null) {
-            final String name = proxyMethod.name();
+            final String name = proxyMethod.value();
             if (!TextUtils.isEmpty(name)) {
                 try {
                     addMethodHook(name, (MethodHook) clazz.newInstance());
@@ -105,7 +105,7 @@ public abstract class ClassInvocationStub implements InvocationHandler, IInjectH
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         MethodHook methodHook = mMethodHookMap.get(method.getName());
-        if (methodHook == null) {
+        if (methodHook == null || !methodHook.isEnable()) {
             try {
                 return method.invoke(mBase, args);
             } catch (Throwable e) {
