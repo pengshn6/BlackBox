@@ -26,8 +26,10 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.text.TextUtils;
+import android.webkit.WebView;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +72,7 @@ import top.niunaijun.blackbox.fake.delegate.ContentProviderDelegate;
 import top.niunaijun.blackbox.fake.frameworks.BXposedManager;
 import top.niunaijun.blackbox.fake.hook.HookManager;
 import top.niunaijun.blackbox.fake.service.HCallbackProxy;
+import top.niunaijun.blackbox.utils.Reflector;
 import top.niunaijun.blackbox.utils.Slog;
 import top.niunaijun.blackbox.utils.compat.ActivityManagerCompat;
 import top.niunaijun.blackbox.utils.compat.BuildCompat;
@@ -324,6 +327,9 @@ public class BActivityThread extends IBActivityThread.Stub {
                 StrictModeCompat.disableDeathOnFileUriExposure();
             }
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WebView.setDataDirectorySuffix(getUserId() + ":" + packageName + ":" + processName);
+        }
 
         VirtualRuntime.setupRuntime(processName, applicationInfo);
 
@@ -410,7 +416,13 @@ public class BActivityThread extends IBActivityThread.Stub {
     }
 
     public static Object installProvider(Object mainThread, Context context, ProviderInfo providerInfo, Object holder) throws Throwable {
-        return BRActivityThread.getWithException(mainThread).installProvider(context, holder, providerInfo, false, true, true);
+        Method installProvider = Reflector.findMethodByFirstName(mainThread.getClass(), "installProvider");
+        if (installProvider != null) {
+            installProvider.setAccessible(true);
+            return installProvider.invoke(mainThread, context, holder, providerInfo, false, true, true);
+        } else {
+            return BRActivityThread.getWithException(mainThread).installProvider(context, holder, providerInfo, false, true, true);
+        }
     }
 
     public void loadXposed(Context context) {

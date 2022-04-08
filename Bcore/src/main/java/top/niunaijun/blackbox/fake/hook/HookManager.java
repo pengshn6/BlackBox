@@ -22,6 +22,7 @@ import top.niunaijun.blackbox.fake.service.IContextHubServiceProxy;
 import top.niunaijun.blackbox.fake.service.IDeviceIdentifiersPolicyProxy;
 import top.niunaijun.blackbox.fake.service.IDevicePolicyManagerProxy;
 import top.niunaijun.blackbox.fake.service.IDisplayManagerProxy;
+import top.niunaijun.blackbox.fake.service.IFingerprintManagerProxy;
 import top.niunaijun.blackbox.fake.service.IGraphicsStatsProxy;
 import top.niunaijun.blackbox.fake.service.IJobServiceProxy;
 import top.niunaijun.blackbox.fake.service.ILauncherAppsProxy;
@@ -38,12 +39,14 @@ import top.niunaijun.blackbox.fake.service.IPowerManagerProxy;
 import top.niunaijun.blackbox.fake.service.IShortcutManagerProxy;
 import top.niunaijun.blackbox.fake.service.IStorageManagerProxy;
 import top.niunaijun.blackbox.fake.service.IStorageStatsManagerProxy;
+import top.niunaijun.blackbox.fake.service.ISystemUpdateProxy;
 import top.niunaijun.blackbox.fake.service.ITelephonyManagerProxy;
 import top.niunaijun.blackbox.fake.service.ITelephonyRegistryProxy;
 import top.niunaijun.blackbox.fake.service.IUserManagerProxy;
 import top.niunaijun.blackbox.fake.service.IVibratorServiceProxy;
 import top.niunaijun.blackbox.fake.service.IVpnManagerProxy;
 import top.niunaijun.blackbox.fake.service.IWifiManagerProxy;
+import top.niunaijun.blackbox.fake.service.IWifiScannerProxy;
 import top.niunaijun.blackbox.fake.service.IWindowManagerProxy;
 import top.niunaijun.blackbox.fake.service.context.ContentServiceStub;
 import top.niunaijun.blackbox.fake.service.context.RestrictionsManagerStub;
@@ -102,7 +105,6 @@ public class HookManager {
             addInjector(new IContextHubServiceProxy());
             addInjector(new IVibratorServiceProxy());
             addInjector(new IPersistentDataBlockServiceProxy());
-
             addInjector(AppInstrumentation.get());
             /*
             * It takes time to test and enhance the compatibility of WifiManager
@@ -110,7 +112,7 @@ public class HookManager {
             * commented by BlackBoxing at 2022/03/08
             * */
             addInjector(new IWifiManagerProxy());
-
+            addInjector(new IWifiScannerProxy());
             // 12.0
             if (BuildCompat.isS()) {
                 addInjector(new IActivityClientProxy(null));
@@ -126,6 +128,7 @@ public class HookManager {
             }
             // 9.0
             if (BuildCompat.isPie()) {
+                addInjector(new ISystemUpdateProxy());
             }
             // 8.0
             if (BuildCompat.isOreo()) {
@@ -143,6 +146,7 @@ public class HookManager {
             }
             // 6.0
             if (BuildCompat.isM()) {
+                addInjector(new IFingerprintManagerProxy());
                 addInjector(new IGraphicsStatsProxy());
             }
             // 5.0
