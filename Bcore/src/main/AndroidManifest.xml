@@ -314,6 +314,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
@@ -389,6 +391,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p0"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -396,6 +399,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p1"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -403,6 +407,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p2"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -410,6 +415,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p3"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -417,6 +423,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p4"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -424,6 +431,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p5"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -431,6 +439,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p6"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -438,6 +447,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p7"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -445,6 +455,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p8"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -452,6 +463,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p9"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -459,6 +471,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p10"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -466,6 +479,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p11"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -473,6 +487,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p12"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -480,6 +495,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p13"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -487,6 +503,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p14"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -494,6 +511,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p15"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -501,6 +519,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p16"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -508,6 +527,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p17"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -515,6 +535,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p18"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -522,6 +543,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p19"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -529,6 +551,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p20"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -536,6 +559,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p21"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -543,6 +567,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p22"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -550,6 +575,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p23"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -557,6 +583,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p24"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -564,6 +591,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p25"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -571,6 +599,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p26"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -578,6 +607,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p27"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -585,6 +615,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p28"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -592,6 +623,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p29"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -599,6 +631,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p30"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -606,6 +639,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p31"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -613,6 +647,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p32"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -620,6 +655,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p33"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -627,6 +663,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p34"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -634,6 +671,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p35"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -641,6 +679,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p36"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -648,6 +687,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p37"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -655,6 +695,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p38"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -662,6 +703,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p39"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -669,6 +711,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p40"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -676,6 +719,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p41"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -683,6 +727,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p42"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -690,6 +735,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p43"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -697,6 +743,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p44"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -704,6 +751,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p45"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -711,6 +759,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p46"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -718,6 +767,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p47"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -725,6 +775,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p48"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
         <activity
@@ -732,6 +783,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p49"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@style/BTheme" />
 
@@ -741,6 +793,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p0"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -748,6 +801,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p1"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -755,6 +809,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p2"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -762,6 +817,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p3"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -769,6 +825,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p4"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -776,6 +833,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p5"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -783,6 +841,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p6"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -790,6 +849,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p7"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -797,6 +857,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p8"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -804,6 +865,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p9"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -811,6 +873,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p10"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -818,6 +881,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p11"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -825,6 +889,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p12"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -832,6 +897,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p13"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -839,6 +905,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p14"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -846,6 +913,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p15"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -853,6 +921,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p16"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -860,6 +929,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p17"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -867,6 +937,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p18"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -874,6 +945,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p19"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -881,6 +953,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p20"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -888,6 +961,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p21"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -895,6 +969,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p22"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -902,6 +977,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p23"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -909,6 +985,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p24"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -916,6 +993,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p25"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -923,6 +1001,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p26"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -930,6 +1009,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p27"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -937,6 +1017,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p28"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -944,6 +1025,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p29"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -951,6 +1033,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p30"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -958,6 +1041,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p31"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -965,6 +1049,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p32"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -972,6 +1057,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p33"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -979,6 +1065,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p34"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -986,6 +1073,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p35"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -993,6 +1081,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p36"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1000,6 +1089,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p37"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1007,6 +1097,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p38"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1014,6 +1105,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p39"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1021,6 +1113,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p40"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1028,6 +1121,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p41"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1035,6 +1129,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p42"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1042,6 +1137,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p43"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1049,6 +1145,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p44"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1056,6 +1153,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p45"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1063,6 +1161,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p46"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1070,6 +1169,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p47"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1077,6 +1177,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p48"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
         <activity
@@ -1084,6 +1185,7 @@
             android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale"
             android:exported="true"
             android:process=":p49"
+            android:supportsPictureInPicture="true"
             android:taskAffinity="top.niunaijun.blackbox.task_affinity"
             android:theme="@android:style/Theme.Translucent" />
 

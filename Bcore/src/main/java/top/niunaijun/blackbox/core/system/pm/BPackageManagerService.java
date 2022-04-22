@@ -282,13 +282,14 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
         }
 
         flags = updateFlags(flags, userId);
+        BPackageSettings ps = null;
         // reader
         synchronized (mPackages) {
             // Normalize package name to handle renamed packages and static libs
-            BPackageSettings ps = mPackages.get(packageName);
-            if (ps != null) {
-                return PackageManagerCompat.generatePackageInfo(ps, flags, ps.readUserState(userId), userId);
-            }
+            ps = mPackages.get(packageName);
+        }
+        if (ps != null) {
+            return PackageManagerCompat.generatePackageInfo(ps, flags, ps.readUserState(userId), userId);
         }
         return null;
     }
@@ -695,7 +696,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
             if (!support) {
                 String msg = packageArchiveInfo.applicationInfo.loadLabel(BlackBoxCore.getPackageManager()) + "[" + packageArchiveInfo.packageName + "]";
                 return result.installError(packageArchiveInfo.packageName,
-                        msg + (BlackBoxCore.is64Bit() ? " not support armeabi-v7a abi" : "not support arm64-v8a abi"));
+                        msg + "\n" + (BlackBoxCore.is64Bit() ? "The box does not support 32-bit Application" : "The box does not support 64-bit Application"));
             }
             PackageParser.Package aPackage = parserApk(apkFile.getAbsolutePath());
             if (aPackage == null) {
