@@ -1,10 +1,8 @@
 package top.niunaijun.blackboxa.view.apps
 
-import android.graphics.Point
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
@@ -45,9 +43,6 @@ class AppsFragment : Fragment() {
 
     private val viewBinding: FragmentAppsBinding by inflate()
 
-    private var popupMenu: PopupMenu? = null
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel =
@@ -77,95 +72,8 @@ class AppsFragment : Fragment() {
         val itemTouchHelper = ItemTouchHelper(touchCallBack)
         itemTouchHelper.attachToRecyclerView(viewBinding.recyclerView)
 
-        mAdapter.setItemClickListener { _, data, _ ->
-            showLoading()
-            viewModel.launchApk(data.packageName, userID)
-        }
-
-
-        interceptTouch()
-        setOnLongClick()
-        return viewBinding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initData()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.getInstalledApps(userID)
-    }
-
-    /**
-     * 拖拽优化
-     */
-    private fun interceptTouch() {
-        val point = Point()
-        viewBinding.recyclerView.setOnTouchListener { v, e ->
-            when (e.action) {
-                MotionEvent.ACTION_UP -> {
-                    if (!isMove(point, e)) {
-                        popupMenu?.show()
-                    }
-                    popupMenu = null
-                    point.set(0, 0)
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    if (point.x == 0 && point.y == 0) {
-                        point.x = e.rawX.toInt()
-                        point.y = e.rawY.toInt()
-                    }
-                    isDownAndUp(point, e)
-
-                    if (isMove(point, e)) {
-                        popupMenu?.dismiss()
-                    }
-                }
-            }
-            return@setOnTouchListener false
-        }
-    }
-
-    private fun isMove(point: Point, e: MotionEvent): Boolean {
-        val max = 40
-
-        val x = point.x
-        val y = point.y
-
-        val xU = abs(x - e.rawX)
-        val yU = abs(y - e.rawY)
-        return xU > max || yU > max
-    }
-
-    private fun isDownAndUp(point: Point, e: MotionEvent) {
-        val min = 10
-        val y = point.y
-        val yU = y - e.rawY
-
-        if (abs(yU) > min) {
-            (requireActivity() as MainActivity).showFloatButton(yU < 0)
-        }
-    }
-
-    private fun onItemMove(fromPosition:Int, toPosition:Int){
-        if (fromPosition < toPosition) {
-            for (i in fromPosition until toPosition) {
-                Collections.swap(mAdapter.getItems(), i, i + 1)
-            }
-        } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(mAdapter.getItems(), i, i - 1)
-            }
-        }
-        mAdapter.notifyItemMoved(fromPosition, toPosition)
-    }
-
-    private fun setOnLongClick() {
-        mAdapter.setItemLongClickListener { view, data, _ ->
-            popupMenu = PopupMenu(requireContext(),view).also {
+        mAdapter.setItemClickListener { view, data, _ ->
+            PopupMenu(requireContext(),view).also {
                 it.inflate(R.menu.app_menu)
                 it.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
@@ -175,6 +83,11 @@ class AppsFragment : Fragment() {
                             } else {
                                 unInstallApk(data)
                             }
+                        }
+
+                        R.id.app_open -> {
+                            showLoading()
+                            viewModel.launchApk(data.packageName, userID)
                         }
 
                         R.id.app_clear -> {
@@ -194,7 +107,36 @@ class AppsFragment : Fragment() {
                 it.show()
             }
         }
+
+
+//        interceptTouch()
+//        setOnLongClick()
+        return viewBinding.root
     }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initData()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.getInstalledApps(userID)
+    }
+
+    private fun onItemMove(fromPosition:Int, toPosition:Int){
+        if (fromPosition < toPosition) {
+            for (i in fromPosition until toPosition) {
+                Collections.swap(mAdapter.getItems(), i, i + 1)
+            }
+        } else {
+            for (i in fromPosition downTo toPosition + 1) {
+                Collections.swap(mAdapter.getItems(), i, i - 1)
+            }
+        }
+        mAdapter.notifyItemMoved(fromPosition, toPosition)
+    }
+
     private fun initData() {
         viewBinding.stateView.showLoading()
         viewModel.getInstalledApps(userID)

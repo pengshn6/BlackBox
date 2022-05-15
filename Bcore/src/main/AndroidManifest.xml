@@ -329,6 +329,8 @@
     <!--android11-->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
+    <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
+
     <application>
         <provider
             android:name="top.niunaijun.blackbox.core.system.SystemCallProvider"
