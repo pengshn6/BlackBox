@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Environment;
 import android.os.Process;
 import android.text.TextUtils;
 
@@ -12,6 +11,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -113,16 +113,18 @@ public class IOCore {
     public void enableRedirect(Context context) {
         Map<String, String> rule = new LinkedHashMap<>();
         Set<String> blackRule = new HashSet<>();
-        String packageName = context.getPackageName();
 
         try {
-            ApplicationInfo packageInfo = BlackBoxCore.getBPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA, BActivityThread.getUserId());
+            //修改所有已安装的路径, 支持xposed module
             int systemUserId = BlackBoxCore.getHostUserId();
-            rule.put(String.format("/data/data/%s/lib", packageName), packageInfo.nativeLibraryDir);
-            rule.put(String.format("/data/user/%d/%s/lib", systemUserId, packageName), packageInfo.nativeLibraryDir);
+            List<ApplicationInfo> installedApplications = BlackBoxCore.getBPackageManager().getInstalledApplications(PackageManager.GET_META_DATA, BActivityThread.getUserId());
+            for (ApplicationInfo packageInfo : installedApplications) {
+                rule.put(String.format("/data/data/%s/lib", packageInfo.packageName), packageInfo.nativeLibraryDir);
+                rule.put(String.format("/data/user/%d/%s/lib", systemUserId, packageInfo.packageName), packageInfo.nativeLibraryDir);
 
-            rule.put(String.format("/data/data/%s", packageName), packageInfo.dataDir);
-            rule.put(String.format("/data/user/%d/%s", systemUserId, packageName), packageInfo.dataDir);
+                rule.put(String.format("/data/data/%s", packageInfo.packageName), packageInfo.dataDir);
+                rule.put(String.format("/data/user/%d/%s", systemUserId, packageInfo.packageName), packageInfo.dataDir);
+            }
 
             if (BlackBoxCore.getContext().getExternalCacheDir() != null && context.getExternalCacheDir() != null) {
                 File external = BEnvironment.getExternalUserDir(BActivityThread.getUserId());
