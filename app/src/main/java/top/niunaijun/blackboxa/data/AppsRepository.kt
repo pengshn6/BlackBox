@@ -52,6 +52,9 @@ class AppsRepository {
                 )
                 installedList.add(info)
             }
+
+            installedList.sortWith(Comparator{ a, b -> if (a.name > b.name) 1 else -1 })
+
             this.mInstalledList.clear()
             this.mInstalledList.addAll(installedList)
         }

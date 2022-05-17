@@ -1,28 +1,27 @@
 ![xx](assets/banner.png)
-### [中文说明](README_ZH.md)
-# Virtual Engine · BlackBox
+### [English Version](README_EN.md)
+
+# 虚拟引擎 · BlackBox
 > The only people who have anything to fear from free software are those whose products are worth even less. 
 >
 > <p align="right">——David Emery</p>
 
-
 ![](https://img.shields.io/badge/language-java-brightgreen.svg)
 
-BlackBox is a virtual engine, it can clone and run virtual application on Android,  users don't have to install APK file to run the application on devices. BlackBox control all virtual applications, so you can do anything you want by using BlackBox.
+黑盒BlackBox，是一款虚拟引擎，可以在Android上克隆、运行虚拟应用，拥有免安装运行能力。黑盒可以掌控被运行的虚拟应用，做任何想做的事情。
 
-## Support
-Currently we don't consider supporting Android 4.x, it supports Android 5.0 ～ 12.0.
+## 支持
+暂不考虑4x，目前已兼容 5.0 ～ 12.0并跟进后续新系统。
 
-If conditions permit, downgrade targetSdkVersion to 28 or below for better compatibility.
+如果条件允许，降级targetSdkVersion到28或以下可以获得更好的兼容性。
 
-***Stability has not been tested extensively and is for learning and communication purposes only Please do not use for other purposes***
+***稳定性未经大量测试，仅供学习交流，请勿用于其他用途***
 
-## Special Instruction
+## 架构说明
+本项目区分32位与64位，目前是2个不同的app，如在Demo已安装列表内无法找到需要开启的app说明不支持，请编译其他的架构。
 
-This project distinguishes between 32-bit and 64-bit, it was compiled to 2 different demos. If you can not find your target in application list, please use another architecture.
-
-## Usage
-### Step 1.Add initialized code in the Application
+## 如何使用
+### Step 1.初始化，在Application中加入以下代码初始化
 
 ```java
     @Override
@@ -47,56 +46,56 @@ This project distinguishes between 32-bit and 64-bit, it was compiled to 2 diffe
     }
 ```
 
-### Step 2.Install application
+### Step 2.安装应用至黑盒内
 ```java
-    // Use package name to install provided that application has been install on device
+    // 已安装的应用可以提供包名
     BlackBoxCore.get().installPackageAsUser("com.tencent.mm", userId);
     
-    // Use APK path to install provided that application has not been install on device
+    // 未安装的应用可以提供路径
     BlackBoxCore.get().installPackageAsUser(new File("/sdcard/com.tencent.mm.apk"), userId);
 ```
 
-### Step 3.Launch application
+### Step 2.运行黑盒内的应用
 ```java
    BlackBoxCore.get().launchApk("com.tencent.mm", userId);
 ```
 
-### App Cloner
+### 多开应用操作
 <img src="assets/multiw.gif" width="50%">
 
-### API
-#### Get application list that were installed in BlackBox
+### 相关API
+#### 获取黑盒内已安装的应用
 ```java
-   // flags can refer to the Android develop documentation
+   // flgas与常规获取已安装应用保持一致即可
    BlackBoxCore.get().getInstalledApplications(flags, userId);
    
    BlackBoxCore.get().getInstalledPackages(flags, userId);
 ```
 
-#### Get user information in BlackBox
+#### 获取黑盒内的User信息
 ```java
    List<BUserInfo> users = BlackBoxCore.get().getUsers();
 ```
-If you want to perform more operations, please refer to the source code.
+更多其他操作看BlackBoxCore函数名大概就知道了。
 
 
-#### Xposed Support
-- BlackBox has supported Xposed Modules.
-- BlackBox has hidden Xposed Framework, [Xposed Checker](https://www.coolapk.com/apk/190247) and [XposedDetector](https://github.com/vvb2060/XposedDetector) can't detect it.
+#### Xposed相关
+- 已支持使用XP模块
+- Xposed已粗略过检测，[Xposed Checker](https://www.coolapk.com/apk/190247)、[XposedDetector](https://github.com/vvb2060/XposedDetector) 均无法检测
 
 
-## How to contribute to this project 
-### This project is divided into two modules
-- app module, it is used to achieve UI and deal with user action.
-- Bcore module, this module is the core of BlackBox, it is used to achieve all functionalities.
+## 如何参与开发？
+### 应用分2个模块
+- app模块，用户操作与UI模块
+- Bcore模块，此模块为BlackBox的核心模块，负责完成整个黑盒的调度。
 
-You can contribute to this project by making pull requests.
-### About pull requests
-1. Both Chinese and English commit message / comment are ok,  but you should elaborate on your code.
-2. Please follow the code style and design pattern of this project.
-3. Welcome everybody take part in this project.
+如需要参与开发请直接pr就可以了，相关教程请Google或者看 [如何在 GitHub 提交第一个 pull request](https://chinese.freecodecamp.org/news/how-to-make-your-first-pull-request-on-github/)
+### PR须知
+1. 中英文说明都可以，但是一定要详细说明问题
+2. 请遵从原项目的代码风格、设计模式，请勿个性化。
+3. PR不分大小，有问题随时欢迎提交。
 
-## Credits
+## 感谢
 - [VirtualApp](https://github.com/asLody/VirtualApp)
 - [VirtualAPK](https://github.com/didi/VirtualAPK)
 - [BlackReflection](https://github.com/CodingGay/BlackReflection)
