@@ -1,6 +1,7 @@
 package top.niunaijun.blackbox.core;
 
 
+import android.os.Binder;
 import android.os.Process;
 
 import androidx.annotation.Keep;
@@ -60,7 +61,11 @@ public class NativeCore {
             return origCallingUid;
 
         if (origCallingUid == BlackBoxCore.getHostUid()) {
-//            Log.d(TAG, "origCallingUid: " + origCallingUid + " => " + BActivityThread.getCallingBUid());
+            int callingPid = Binder.getCallingPid();
+            int bUid = BlackBoxCore.getBPackageManager().getUidByPid(callingPid);
+            if (bUid != -1) {
+                return bUid;
+            }
             return BActivityThread.getCallingBUid();
         }
         return origCallingUid;

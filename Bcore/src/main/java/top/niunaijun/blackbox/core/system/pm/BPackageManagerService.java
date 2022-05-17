@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.File;
 import java.io.InputStream;
@@ -64,6 +65,7 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
     private final ComponentResolver mComponentResolver;
     private static final BUserManagerService sUserManager = BUserManagerService.get();
     private final List<PackageMonitor> mPackageMonitors = new ArrayList<>();
+
 
     final Map<String, BPackageSettings> mPackages = mSettings.mPackages;
     final Object mInstallLock = new Object();
@@ -267,6 +269,16 @@ public class BPackageManagerService extends IBPackageManagerService.Stub impleme
             }
         }
         return null;
+    }
+
+    @Override
+    public int getUidByPid(int pid) {
+        ProcessRecord processByPid = BProcessManagerService.get().findProcessByPid(pid);
+        if (processByPid != null) {
+            return processByPid.buid;
+        }
+
+        return -1;
     }
 
     @Override

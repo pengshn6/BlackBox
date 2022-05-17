@@ -19,6 +19,7 @@ import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
 import top.niunaijun.blackbox.utils.Md5Utils;
+import top.niunaijun.blackbox.utils.MethodParameterUtils;
 
 /**
  * Created by Milk on 4/2/21.
@@ -49,6 +50,13 @@ public class ITelephonyManagerProxy extends BinderInvocationStub {
     @Override
     public boolean isBadEnv() {
         return false;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+//        Log.d(TAG, "call: " + method.getName());
+//        MethodParameterUtils.replaceFirstAppPkg(args);
+        return super.invoke(proxy, method, args);
     }
 
     @ProxyMethod("getDeviceId")
@@ -134,6 +142,7 @@ public class ITelephonyManagerProxy extends BinderInvocationStub {
     public static class GetAllCellInfo extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            Log.d(TAG, "GetAllCellInfo");
             if (BLocationManager.isFakeLocationEnable()) {
                 List<BCell> cell = BLocationManager.get().getAllCell(BActivityThread.getUserId(), BActivityThread.getAppPackageName());
                 // TODO Transfer BCell to CdmaCellLocation/GsmCellLocation

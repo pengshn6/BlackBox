@@ -116,6 +116,15 @@ public class BPackageManager extends BlackManager<IBPackageManagerService> {
         return null;
     }
 
+    public int getUidByPid(int pid) {
+        try {
+            return getService().getUidByPid(pid);
+        } catch (RemoteException e) {
+            crash(e);
+        }
+        return -1;
+    }
+
     public PackageInfo getPackageInfo(String packageName, int flags, int userId) {
         try {
             return getService().getPackageInfo(packageName, flags, userId);

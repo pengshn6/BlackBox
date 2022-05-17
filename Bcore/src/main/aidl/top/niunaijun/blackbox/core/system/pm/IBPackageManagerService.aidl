@@ -17,6 +17,8 @@ import top.niunaijun.blackbox.entity.pm.InstalledPackage;
 
 
 interface IBPackageManagerService {
+    int getUidByPid(int pid);
+
     ResolveInfo resolveService(in Intent intent, int flags, String resolvedType, int userId);
     ResolveInfo resolveActivity(in Intent intent, int flags, String resolvedType, int userId);
     ProviderInfo resolveContentProvider(String authority, int flag, int userId);

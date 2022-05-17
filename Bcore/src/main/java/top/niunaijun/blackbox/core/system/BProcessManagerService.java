@@ -101,6 +101,8 @@ public class BProcessManagerService implements ISystemService {
                 app = null;
             } else {
                 app.pid = getPid(BlackBoxCore.getContext(), ProxyManifest.getProcessName(app.bpid));
+
+                Log.d(TAG, "init pid = " + app.pid);
             }
         }
         return app;

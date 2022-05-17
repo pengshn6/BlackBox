@@ -3,6 +3,7 @@
 //
 
 #include <jni.h>
+#include <cstring>
 #include "JniHook.h"
 #include "Log.h"
 #include "ArtMethod.h"
@@ -144,11 +145,11 @@ JniHook::HookJniFun(JNIEnv *env, const char *class_name, const char *method_name
     };
 
     auto artMethod = reinterpret_cast<uintptr_t *>(GetArtMethod(env, clazz, method));
-//  取消检查, 可能有其它问题, 不过目前对于部分APP是工作了
-//    if (!CheckFlags(artMethod)) {
-//        ALOGE("check flags error. class：%s, method：%s", class_name, method_name);
-//        return;
-//    }
+    //  不检查系统包
+    if (!strncmp(class_name, "android.", 8) && !CheckFlags(artMethod)) {
+        ALOGE("check flags error. class：%s, method：%s", class_name, method_name);
+        return;
+    }
     *orig_fun = reinterpret_cast<void *>(artMethod[HookEnv.art_method_native_offset]);
     if (env->RegisterNatives(clazz, gMethods, 1) < 0) {
         ALOGE("jni hook error. class：%s, method：%s", class_name, method_name);
