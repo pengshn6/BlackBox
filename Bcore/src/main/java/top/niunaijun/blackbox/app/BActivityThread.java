@@ -416,11 +416,7 @@ public class BActivityThread extends IBActivityThread.Stub {
     }
 
     public static void installProvider(Object mainThread, Context context, ProviderInfo providerInfo, Object holder) throws Throwable {
-        Method installProvider = Reflector.findMethodByFirstName(mainThread.getClass(), "installProvider");
-        if (installProvider != null) {
-            installProvider.setAccessible(true);
-            installProvider.invoke(mainThread, context, holder, providerInfo, false, true, true);
-        }
+        Reflector.invoke(mainThread.getClass(), mainThread, "installProvider", context, holder, providerInfo, false, true, true);
     }
 
     public void loadXposed(Context context) {

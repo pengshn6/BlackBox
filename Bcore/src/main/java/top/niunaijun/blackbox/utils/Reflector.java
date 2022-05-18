@@ -1,16 +1,16 @@
 package top.niunaijun.blackbox.utils;
 
 
+import org.lsposed.hiddenapibypass.HiddenApiBypass;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
-/**
- * Created by qiaopu on 2018/4/26.
- */
 public class Reflector {
     public static final String LOG_TAG = "Reflector";
 
@@ -51,9 +51,10 @@ public class Reflector {
 
     }
 
+    @SuppressWarnings("unchecked")
     public Reflector constructor(Class<?>... parameterTypes) throws Exception {
         try {
-            mConstructor = mType.getDeclaredConstructor(parameterTypes);
+            mConstructor = HiddenApiBypass.getDeclaredConstructor(mType, parameterTypes);
             mConstructor.setAccessible(true);
             mField = null;
             mMethod = null;
@@ -120,15 +121,34 @@ public class Reflector {
         try {
             return mType.getField(name);
         } catch (NoSuchFieldException e) {
-            for (Class<?> cls = mType; cls != null; cls = cls.getSuperclass()) {
-                try {
-                    return cls.getDeclaredField(name);
-                } catch (NoSuchFieldException ex) {
-                    // Ignored
-                }
+            try {
+                return findInstanceField(name);
+            } catch (NoSuchFieldException ex) {
+                return findStaticField(name);
             }
-            throw e;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Field findInstanceField(String name) throws NoSuchFieldException {
+        List<Field> allInstanceFields = HiddenApiBypass.getInstanceFields(mType);
+        for (Field f : allInstanceFields) {
+            if (f.getName().equals(name)) {
+                return f;
+            }
+        }
+        throw new NoSuchFieldException();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Field findStaticField(String name) throws NoSuchFieldException {
+        List<Field> allStaticFields = HiddenApiBypass.getStaticFields(mType);
+        for (Field f : allStaticFields) {
+            if (f.getName().equals(name)) {
+                return f;
+            }
+        }
+        throw new NoSuchFieldException();
     }
 
     @SuppressWarnings("unchecked")
@@ -172,18 +192,12 @@ public class Reflector {
         }
     }
 
+    @SuppressWarnings("unchecked")
     protected Method findMethod(String name, Class<?>... parameterTypes) throws NoSuchMethodException {
         try {
             return mType.getMethod(name, parameterTypes);
-        } catch (NoSuchMethodException e) {
-            for (Class<?> cls = mType; cls != null; cls = cls.getSuperclass()) {
-                try {
-                    return cls.getDeclaredMethod(name, parameterTypes);
-                } catch (NoSuchMethodException ex) {
-                    // Ignored
-                }
-            }
-            throw e;
+        } catch (Exception e) {
+            return HiddenApiBypass.getDeclaredMethod(mType, name, parameterTypes);
         }
     }
 
@@ -203,241 +217,8 @@ public class Reflector {
         }
     }
 
-    public static class QuietReflector extends Reflector {
-
-        protected Throwable mIgnored;
-
-        public static QuietReflector on(String name) {
-            return on(name, true, QuietReflector.class.getClassLoader());
-        }
-
-        public static QuietReflector on(String name, boolean initialize) {
-            return on(name, initialize, QuietReflector.class.getClassLoader());
-        }
-
-        public static QuietReflector on(String name, boolean initialize, ClassLoader loader) {
-            Class<?> cls = null;
-            try {
-                cls = Class.forName(name, initialize, loader);
-                return on(cls, null);
-            } catch (Throwable e) {
-//                Log.w(LOG_TAG, "Oops!", e);
-                return on(cls, e);
-            }
-        }
-
-        public static QuietReflector on(Class<?> type) {
-            return on(type, (type == null) ? new Exception("Type was null!") : null);
-        }
-
-        private static QuietReflector on(Class<?> type, Throwable ignored) {
-            QuietReflector reflector = new QuietReflector();
-            reflector.mType = type;
-            reflector.mIgnored = ignored;
-            return reflector;
-        }
-
-        public static QuietReflector with(Object caller) {
-            if (caller == null) {
-                return on((Class<?>) null);
-            }
-            return on(caller.getClass()).bind(caller);
-        }
-
-        protected QuietReflector() {
-
-        }
-
-        public Throwable getIgnored() {
-            return mIgnored;
-        }
-
-        protected boolean skip() {
-            return skipAlways() || mIgnored != null;
-        }
-
-        protected boolean skipAlways() {
-            return mType == null;
-        }
-
-        @Override
-        public QuietReflector constructor(Class<?>... parameterTypes) {
-            if (skipAlways()) {
-                return this;
-            }
-            try {
-                mIgnored = null;
-                super.constructor(parameterTypes);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return this;
-        }
-
-        @Override
-        public <R> R newInstance(Object... initargs) {
-            if (skip()) {
-                return null;
-            }
-            try {
-                mIgnored = null;
-                return super.newInstance(initargs);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return null;
-        }
-
-        @Override
-        public QuietReflector bind(Object obj) {
-            if (skipAlways()) {
-                return this;
-            }
-            try {
-                mIgnored = null;
-                super.bind(obj);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return this;
-        }
-
-        @Override
-        public QuietReflector unbind() {
-            super.unbind();
-            return this;
-        }
-
-        @Override
-        public QuietReflector field(String name) {
-            if (skipAlways()) {
-                return this;
-            }
-            try {
-                mIgnored = null;
-                super.field(name);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return this;
-        }
-
-        @Override
-        public <R> R get() {
-            if (skip()) {
-                return null;
-            }
-            try {
-                mIgnored = null;
-                return super.get();
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return null;
-        }
-
-        @Override
-        public <R> R get(Object caller) {
-            if (skip()) {
-                return null;
-            }
-            try {
-                mIgnored = null;
-                return super.get(caller);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return null;
-        }
-
-        @Override
-        public QuietReflector set(Object value) {
-            if (skip()) {
-                return this;
-            }
-            try {
-                mIgnored = null;
-                super.set(value);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return this;
-        }
-
-        @Override
-        public QuietReflector set(Object caller, Object value) {
-            if (skip()) {
-                return this;
-            }
-            try {
-                mIgnored = null;
-                super.set(caller, value);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return this;
-        }
-
-        @Override
-        public QuietReflector method(String name, Class<?>... parameterTypes) {
-            if (skipAlways()) {
-                return this;
-            }
-            try {
-                mIgnored = null;
-                super.method(name, parameterTypes);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return this;
-        }
-
-        @Override
-        public <R> R call(Object... args) {
-            if (skip()) {
-                return null;
-            }
-            try {
-                mIgnored = null;
-                return super.call(args);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return null;
-        }
-
-        @Override
-        public <R> R callByCaller(Object caller, Object... args) {
-            if (skip()) {
-                return null;
-            }
-            try {
-                mIgnored = null;
-                return super.callByCaller(caller, args);
-            } catch (Throwable e) {
-                mIgnored = e;
-//                Log.w(LOG_TAG, "Oops!", e);
-            }
-            return null;
-        }
-    }
-
-    public static Method findMethodByFirstName(Class<?> clazz, String methodName) {
-        for (Method declaredMethod : clazz.getDeclaredMethods()) {
-            if (methodName.equals(declaredMethod.getName())) {
-                return declaredMethod;
-            }
-        }
-        return null;
+    @SuppressWarnings("unchecked")
+    public static <R> R invoke(Class<?> clazz, Object thiz, String methodName, Object... args) {
+        return (R) HiddenApiBypass.invoke(clazz, thiz, methodName, args);
     }
 }

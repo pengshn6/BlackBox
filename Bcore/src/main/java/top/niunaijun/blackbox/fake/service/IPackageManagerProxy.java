@@ -213,7 +213,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod("getInstalledApplications")
+        @ProxyMethod("getInstalledApplications")
     public static class GetInstalledApplications extends MethodHook {
 
         @Override
@@ -221,6 +221,19 @@ public class IPackageManagerProxy extends BinderInvocationStub {
             int flags = (int) args[0];
             List<ApplicationInfo> installedApplications = BlackBoxCore.getBPackageManager().getInstalledApplications(flags, BActivityThread.getUserId());
             return ParceledListSliceCompat.create(installedApplications);
+        }
+    }
+
+    @ProxyMethod("queryIntentActivities")
+    public static class QueryIntentActivities extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            Intent intent = (Intent) args[0];
+            String resolvedType = (String) args[1];
+            int flags = (int) args[2];
+
+            List<ResolveInfo> intentActivities = BlackBoxCore.getBPackageManager().queryIntentActivities(intent, flags, resolvedType, BActivityThread.getUserId());
+            return ParceledListSliceCompat.create(intentActivities);
         }
     }
 
@@ -343,7 +356,7 @@ public class IPackageManagerProxy extends BinderInvocationStub {
     }
 
     @ProxyMethod("getComponentEnabledSetting")
-    public static class getComponentEnabledSetting extends MethodHook {
+    public static class GetComponentEnabledSetting extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
