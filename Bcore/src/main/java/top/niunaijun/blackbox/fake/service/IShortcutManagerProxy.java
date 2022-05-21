@@ -86,27 +86,11 @@ public class IShortcutManagerProxy extends BinderInvocationStub {
         }
     }
 
-    @ProxyMethod("addDynamicShortcuts")
-    public static class AddDynamicShortcuts extends MethodHook {
-        @Override
-        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
-            return true;
-        }
-    }
-
     @ProxyMethod("createShortcutResultIntent")
     public static class CreateShortcutResultIntent extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             return new Intent();
-        }
-    }
-
-    @ProxyMethod("pushDynamicShortcut")
-    public static class PushDynamicShortcut extends MethodHook {
-        @Override
-        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
-            return method.invoke(who, args);
         }
     }
 
