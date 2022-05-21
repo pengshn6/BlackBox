@@ -189,8 +189,13 @@ public class PackageManagerCompat {
         }
         PackageInfo base = null;
         try {
-            base = BlackBoxCore.getContext().getPackageManager().getPackageInfo(p.packageName, flags);
+            base = BlackBoxCore.getPackageManager().getPackageInfo(p.packageName, flags);
         } catch (PackageManager.NameNotFoundException ignored) {
+        }
+        if(base != null){
+            if(base.splitNames != null){
+                pi.splitNames = base.splitNames;
+            }
         }
         if ((flags & PackageManager.GET_SIGNATURES) != 0) {
             if (base == null) {

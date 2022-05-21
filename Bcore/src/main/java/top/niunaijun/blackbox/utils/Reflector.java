@@ -1,6 +1,8 @@
 package top.niunaijun.blackbox.utils;
 
 
+import android.annotation.SuppressLint;
+
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
 import java.lang.reflect.Constructor;
@@ -51,7 +53,7 @@ public class Reflector {
 
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressLint("NewApi")
     public Reflector constructor(Class<?>... parameterTypes) throws Exception {
         try {
             mConstructor = HiddenApiBypass.getDeclaredConstructor(mType, parameterTypes);
@@ -129,7 +131,7 @@ public class Reflector {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressLint("NewApi")
     protected Field findInstanceField(String name) throws NoSuchFieldException {
         List<Field> allInstanceFields = HiddenApiBypass.getInstanceFields(mType);
         for (Field f : allInstanceFields) {
@@ -192,7 +194,7 @@ public class Reflector {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressLint("NewApi")
     protected Method findMethod(String name, Class<?>... parameterTypes) throws NoSuchMethodException {
         try {
             return mType.getMethod(name, parameterTypes);
@@ -217,7 +219,7 @@ public class Reflector {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressLint("NewApi")
     public static <R> R invoke(Class<?> clazz, Object thiz, String methodName, Object... args) {
         return (R) HiddenApiBypass.invoke(clazz, thiz, methodName, args);
     }

@@ -103,7 +103,7 @@ public final class AppInstrumentation extends BaseInstrumentationDelegate implem
 
     private void checkActivity(Activity activity) {
         Log.d(TAG, "callActivityOnCreate: " + activity.getClass().getName());
-        HackAppUtils.enableQQLogOutput(activity.getPackageName(), activity.getClassLoader());
+        HackAppUtils.hackActivity(activity.getPackageName(), activity.getClassLoader());
         checkHCallback();
         HookManager.get().checkEnv(IActivityClientProxy.class);
         ActivityInfo info = BRActivity.get(activity).mActivityInfo();

@@ -142,6 +142,29 @@ public class PackageParser {
     }
 
     /**
+     * For SDK_INT 29+
+     */
+    public Callback mCallback;
+
+    public interface Callback {
+        boolean hasFeature(String feature);
+    }
+
+    public static final class CallbackImpl implements Callback {
+        private final PackageManager mPm;
+        public CallbackImpl(PackageManager pm) {
+            mPm = pm;
+        }
+        @Override public boolean hasFeature(String feature) {
+            return mPm.hasSystemFeature(feature);
+        }
+    }
+
+    public void setCallback(Callback cb) {
+        mCallback = cb;
+    }
+
+    /**
      * For Android 5.0+
      */
     public PackageParser() {

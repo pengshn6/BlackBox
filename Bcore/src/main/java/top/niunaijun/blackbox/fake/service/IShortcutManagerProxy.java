@@ -103,7 +103,15 @@ public class IShortcutManagerProxy extends BinderInvocationStub {
     }
 
     @ProxyMethod("pushDynamicShortcut")
-    public static class pushDynamicShortcut extends MethodHook {
+    public static class PushDynamicShortcut extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            return method.invoke(who, args);
+        }
+    }
+
+    @ProxyMethod("getMaxShortcutCountPerActivity")
+    public static class GetMaxShortcutCountPerActivity extends MethodHook {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             return 0;
