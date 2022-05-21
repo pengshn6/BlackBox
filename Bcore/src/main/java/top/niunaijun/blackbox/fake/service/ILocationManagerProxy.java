@@ -93,6 +93,18 @@ public class ILocationManagerProxy extends BinderInvocationStub {
         }
     }
 
+    @ProxyMethod("getCurrentLocation")
+    public static class  GetCurrentLocation extends MethodHook {
+
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            if (BLocationManager.isFakeLocationEnable()) {
+                return BLocationManager.get().getLocation(BActivityThread.getUserId(), BActivityThread.getAppPackageName()).convert2SystemLocation();
+            }
+            return method.invoke(who, args);
+        }
+    }
+
     @ProxyMethod("requestLocationUpdates")
     public static class RequestLocationUpdates extends MethodHook {
 

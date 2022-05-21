@@ -174,7 +174,7 @@ class MainActivity : LoadingActivity() {
             R.id.fake_location -> {
 //                toast("Still Developing")
                 val intent = Intent(this, FakeManagerActivity::class.java)
-                intent.putExtra("userID", 0)
+                intent.putExtra("userID", currentUser)
                 startActivity(intent)
             }
         }
