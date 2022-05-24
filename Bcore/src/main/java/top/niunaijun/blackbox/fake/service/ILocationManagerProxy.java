@@ -2,6 +2,7 @@ package top.niunaijun.blackbox.fake.service;
 
 import android.content.Context;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.IInterface;
 import android.util.Log;
 
@@ -20,6 +21,7 @@ import top.niunaijun.blackbox.fake.frameworks.BLocationManager;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
+import top.niunaijun.blackbox.fake.hook.ProxyVersion;
 import top.niunaijun.blackbox.utils.MethodParameterUtils;
 
 /**
@@ -74,6 +76,7 @@ public class ILocationManagerProxy extends BinderInvocationStub {
 
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            Log.d(TAG, "GetLastLocation");
             if (BLocationManager.isFakeLocationEnable()) {
                 return BLocationManager.get().getLocation(BActivityThread.getUserId(), BActivityThread.getAppPackageName()).convert2SystemLocation();
             }
@@ -86,6 +89,8 @@ public class ILocationManagerProxy extends BinderInvocationStub {
 
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+
+            Log.d(TAG, "GetLastKnownLocation");
             if (BLocationManager.isFakeLocationEnable()) {
                 return BLocationManager.get().getLocation(BActivityThread.getUserId(), BActivityThread.getAppPackageName()).convert2SystemLocation();
             }
@@ -98,6 +103,7 @@ public class ILocationManagerProxy extends BinderInvocationStub {
 
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            Log.d(TAG, "GetCurrentLocation");
             if (BLocationManager.isFakeLocationEnable()) {
                 return BLocationManager.get().getLocation(BActivityThread.getUserId(), BActivityThread.getAppPackageName()).convert2SystemLocation();
             }
@@ -106,11 +112,14 @@ public class ILocationManagerProxy extends BinderInvocationStub {
     }
 
     @ProxyMethod("requestLocationUpdates")
+    @ProxyVersion(lower=Build.VERSION_CODES.JELLY_BEAN, upper=10000)
     public static class RequestLocationUpdates extends MethodHook {
 
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+//            Log.d(TAG, "RequestLocationUpdates");
             if (BLocationManager.isFakeLocationEnable()) {
+                Log.d(TAG, "isFakeLocationEnable RequestLocationUpdates");
                 if (args[1] instanceof IInterface) {
                     IInterface listener = (IInterface) args[1];
                     BLocationManager.get().requestLocationUpdates(listener.asBinder());

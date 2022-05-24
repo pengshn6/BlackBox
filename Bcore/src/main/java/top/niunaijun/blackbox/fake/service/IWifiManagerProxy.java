@@ -56,6 +56,7 @@ public class IWifiManagerProxy extends BinderInvocationStub {
         * */
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            Log.d(TAG, "getConnectionInfo");
             WifiInfo wifiInfo = (WifiInfo) method.invoke(who, args);
             BRWifiInfo.get(wifiInfo)._set_mBSSID("ac:62:5a:82:65:c4");
             BRWifiInfo.get(wifiInfo)._set_mMacAddress("ac:62:5a:82:65:c4");
@@ -96,6 +97,8 @@ public class IWifiManagerProxy extends BinderInvocationStub {
 //            BRWifiInfo.get(wifiInfo)._set_mBSSID("ac:62:5a:82:65:c4");
 //            BRWifiInfo.get(wifiInfo)._set_mMacAddress("ac:62:5a:82:65:c4");
 //            BRWifiInfo.get(wifiInfo)._set_mWifiSsid(BRWifiSsid.get().createFromAsciiEncoded("BlackBox_Wifi"));
+
+            Log.d(TAG, "GetScanResults");
             List<ScanResult> scanResults = new ArrayList<>();
             return scanResults;
         }
