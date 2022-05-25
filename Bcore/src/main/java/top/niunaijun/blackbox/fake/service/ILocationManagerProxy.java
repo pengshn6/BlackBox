@@ -1,6 +1,8 @@
 package top.niunaijun.blackbox.fake.service;
 
 import android.content.Context;
+import android.location.ILocationListener;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.IInterface;
 import android.util.Log;
@@ -9,17 +11,15 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
 
-import black.android.location.BRILocationListener;
 import black.android.location.BRILocationManagerStub;
 import black.android.location.provider.BRProviderProperties;
-import black.android.location.provider.ProviderProperties;
 import black.android.os.BRServiceManager;
 import top.niunaijun.blackbox.app.BActivityThread;
-import top.niunaijun.blackbox.entity.location.BLocation;
 import top.niunaijun.blackbox.fake.frameworks.BLocationManager;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
+import top.niunaijun.blackbox.utils.HackLocationUtils;
 import top.niunaijun.blackbox.utils.MethodParameterUtils;
 
 /**
@@ -64,10 +64,32 @@ public class ILocationManagerProxy extends BinderInvocationStub {
 
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
-            // todo
-            return true;
+            if (BLocationManager.isFakeLocationEnable()) {
+                // todo
+//                Object transport = MethodParameterUtils.getFirstParam(args, GnssStatusListenerTransport.class);
+//                if (transport != null) {
+//                }
+                return true;
+            }
+            return method.invoke(who, args);
         }
     }
+
+    @ProxyMethod("registerLocationListener")
+    public static class RegisterLocationListener extends MethodHook {
+
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            if (BLocationManager.isFakeLocationEnable()) {
+                Object listener = MethodParameterUtils.getFirstParamByInstance(args, ILocationListener.Stub.class);
+                if (listener != null) {
+                    HackLocationUtils.hackListener(listener);
+                }
+            }
+            return method.invoke(who, args);
+        }
+    }
+
 
     @ProxyMethod("getLastLocation")
     public static class GetLastLocation extends MethodHook {
@@ -111,9 +133,9 @@ public class ILocationManagerProxy extends BinderInvocationStub {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             if (BLocationManager.isFakeLocationEnable()) {
-                if (args[1] instanceof IInterface) {
-                    IInterface listener = (IInterface) args[1];
-                    BLocationManager.get().requestLocationUpdates(listener.asBinder());
+                Object listener = MethodParameterUtils.getFirstParamByInstance(args, LocationListener.class);
+                if (listener != null) {
+                    BLocationManager.get().requestLocationUpdates(((IInterface) listener).asBinder());
                     return 0;
                 }
             }
@@ -147,7 +169,7 @@ public class ILocationManagerProxy extends BinderInvocationStub {
                     BRProviderProperties.get(providerProperties)._set_mHasCellRequirement(false);
                 }
             }
-            return method.invoke(who, args);
+            return providerProperties;
         }
     }
 

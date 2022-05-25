@@ -19,6 +19,17 @@ public class MethodParameterUtils {
         return null;
     }
 
+    public static <T> T getFirstParamByInstance(Object[] args, Class<T> tClass) {
+        if (args == null) {
+            return null;
+        }
+        int index = ArrayUtils.indexOfObject(args, tClass, 0);
+        if (index != -1) {
+            return (T) args[index];
+        }
+        return null;
+    }
+
     public static String replaceFirstAppPkg(Object[] args) {
         if (args == null) {
             return null;
