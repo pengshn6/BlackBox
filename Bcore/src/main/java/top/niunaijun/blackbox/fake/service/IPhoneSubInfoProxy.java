@@ -1,11 +1,16 @@
 package top.niunaijun.blackbox.fake.service;
 
+import android.util.Log;
+
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import black.android.telephony.BRTelephonyManager;
+import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.fake.hook.ClassInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
+import top.niunaijun.blackbox.utils.Md5Utils;
 import top.niunaijun.blackbox.utils.MethodParameterUtils;
 
 /**
@@ -35,7 +40,8 @@ public class IPhoneSubInfoProxy extends ClassInvocationStub {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        MethodParameterUtils.replaceFirstAppPkg(args);
+//        Log.d(TAG, "call: " + method.getName());
+        MethodParameterUtils.replaceLastAppPkg(args);
         return super.invoke(proxy, method, args);
     }
 
@@ -52,4 +58,25 @@ public class IPhoneSubInfoProxy extends ClassInvocationStub {
             return null;
         }
     }
+
+
+    @ProxyMethod("getSubscriberIdForSubscriber")
+    public static class GetSubscriberIdForSubscriber extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            return Md5Utils.md5(BlackBoxCore.getHostPkg());
+        }
+    }
+
+    @ProxyMethod("getIccSerialNumber")
+    public static class GetIccSerialNumber extends MethodHook {
+        @Override
+        protected Object hook(Object who, Method method, Object[] args) throws Throwable {
+            return "89860221919704198154";
+        }
+    }
+
+    @ProxyMethod("getIccSerialNumberForSubscriber")
+    public static class GetIccSerialNumberForSubscriber extends GetIccSerialNumber {}
+
 }

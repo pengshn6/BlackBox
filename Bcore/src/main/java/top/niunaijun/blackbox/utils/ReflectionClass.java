@@ -12,51 +12,54 @@ public class ReflectionClass {
     @SuppressWarnings("rawtypes")
     public static void print(String name) {
         try {
-            // print class name and super class name (if != object)
             Class cl = Class.forName(name);
-            Class supercl = cl.getSuperclass();
-            Class[] interfaces = cl.getInterfaces();
-            String modifiers = Modifier.toString(cl.getModifiers());
-            if (modifiers.length() > 0) {
-                System.out.print(modifiers);
-            }
-
-            // is class or interface
-            if (!cl.isInterface()) {
-                System.out.print(" class ");
-            }
-
-            printType(cl);
-
-            if (supercl != null && supercl != Object.class) {
-                System.out.print(" extends ");
-                printType(supercl);
-            }
-
-            if (interfaces.length > 0) {
-                System.out.print(" implements ");
-
-                for (int j = 0; j < interfaces.length; j++) {
-                    if (j > 0) {
-                        System.out.print(", ");
-                    }
-                    printType(interfaces[j]);
-                }
-            }
-
-            System.out.print(" {\n");
-
-            printConstructors(cl);
-            System.out.println();
-            printMethods(cl);
-            System.out.println();
-            printFields(cl);
-            System.out.println("}");
-
-            printExtendsChain(cl);
+            print(cl);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void print(Class cl) {
+        Class supercl = cl.getSuperclass();
+        Class[] interfaces = cl.getInterfaces();
+        String modifiers = Modifier.toString(cl.getModifiers());
+        if (modifiers.length() > 0) {
+            System.out.print(modifiers);
+        }
+
+        // is class or interface
+        if (!cl.isInterface()) {
+            System.out.print(" class ");
+        }
+
+        printType(cl);
+
+        if (supercl != null && supercl != Object.class) {
+            System.out.print(" extends ");
+            printType(supercl);
+        }
+
+        if (interfaces.length > 0) {
+            System.out.print(" implements ");
+
+            for (int j = 0; j < interfaces.length; j++) {
+                if (j > 0) {
+                    System.out.print(", ");
+                }
+                printType(interfaces[j]);
+            }
+        }
+
+        System.out.print(" {\n");
+
+        printConstructors(cl);
+        System.out.println();
+        printMethods(cl);
+        System.out.println();
+        printFields(cl);
+        System.out.println("}");
+
+        printExtendsChain(cl);
     }
 
     /**

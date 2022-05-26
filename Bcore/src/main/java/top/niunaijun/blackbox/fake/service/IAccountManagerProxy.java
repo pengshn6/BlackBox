@@ -53,7 +53,7 @@ public class IAccountManagerProxy extends BinderInvocationStub {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Slog.d(TAG, "call " + method.getName());
+//        Slog.d(TAG, "call " + method.getName());
         return super.invoke(proxy, method, args);
     }
 

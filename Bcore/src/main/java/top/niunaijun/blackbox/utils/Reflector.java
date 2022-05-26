@@ -223,4 +223,13 @@ public class Reflector {
     public static <R> R invoke(Class<?> clazz, Object thiz, String methodName, Object... args) {
         return (R) HiddenApiBypass.invoke(clazz, thiz, methodName, args);
     }
+
+    public static Method findMethodByFirstName(Class<?> clazz, String methodName) {
+        for (Method declaredMethod : clazz.getDeclaredMethods()) {
+            if (methodName.equals(declaredMethod.getName())) {
+                return declaredMethod;
+            }
+        }
+        return null;
+    }
 }
