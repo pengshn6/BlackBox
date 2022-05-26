@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-
+    ndkVersion rootProject.ext.ndkVersion
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
@@ -15,9 +15,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                cFlags '-Wall -Wextra -Werror -fvisibility=hidden -fvisibility-inlines-hidden'
-                cppFlags '-std=c++17 -fno-exceptions -fno-rtti'
-                // arguments '-DANDROID_STL=none' // built-in libcxx has exception
+                arguments '-DANDROID_STL=none' // built-in libcxx introduced exception, so use our own instead
                 abiFilters 'armeabi-v7a', 'arm64-v8a'
                 targets 'pine'
             }
@@ -34,30 +32,16 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
+            version rootProject.ext.cmakeVersion
         }
     }
 
     buildFeatures {
-        // prefab true
+        prefab true
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    // implementation 'dev.rikka.ndk.thirdparty:cxx:1.1.0'
+    implementation 'dev.rikka.ndk.thirdparty:cxx:1.2.0'
 }
-
-/*
-apply plugin: 'com.novoda.bintray-release'
-
-publish {
-    userOrg = rootProject.userOrg
-    repoName = rootProject.repoName
-    groupId = rootProject.groupId
-    artifactId = 'core'
-    publishVersion = '0.2.5'
-    desc = 'pine hook core library'
-    licences = rootProject.licences
-    website = rootProject.website
-}
- */

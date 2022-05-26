@@ -3,8 +3,10 @@ package de.robv.android.xposed;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.system.StructStat;
 import android.util.Log;
 
 import com.android.internal.util.XmlUtils;
@@ -16,7 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +65,7 @@ public final class XSharedPreferences implements SharedPreferences {
 	 * @param prefFileName The file name without ".xml".
 	 */
 	public XSharedPreferences(String packageName, String prefFileName) {
-		mFile = getXSharedPreferences(packageName, prefFileName);
+		mFile = new File(Environment.getDataDirectory(), "data/" + packageName + "/shared_prefs/" + prefFileName + ".xml");
 //		mFilename = mFile.getAbsolutePath();
 		startLoadFromDisk();
 	}
@@ -309,17 +310,5 @@ public final class XSharedPreferences implements SharedPreferences {
 	@Override
 	public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
 		throw new UnsupportedOperationException("listeners are not supported in this implementation");
-	}
-
-
-	public static File getXSharedPreferences(String packageName, String prefFileName) {
-		try {
-			Class<?> bEnvironment = XSharedPreferences.class.getClassLoader().loadClass("top.niunaijun.blackbox.core.env.BEnvironment");
-			Method getXSharedPreferences = bEnvironment.getDeclaredMethod("getXSharedPreferences", String.class, String.class);
-			getXSharedPreferences.setAccessible(true);
-			return (File) getXSharedPreferences.invoke(null, packageName, prefFileName);
-		} catch (Throwable e) {
-			return null;
-		}
 	}
 }

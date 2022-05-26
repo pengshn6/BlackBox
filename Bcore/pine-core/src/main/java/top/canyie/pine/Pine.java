@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Build;
 import android.util.Log;
 
+import top.canyie.pine.callback.MethodHook;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -16,8 +18,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import top.canyie.pine.callback.MethodHook;
 
 /**
  * The bridge class provides main APIs for you.
@@ -58,6 +58,9 @@ public final class Pine {
     };
 
     private static HookListener sHookListener;
+
+    /** Internal API, used by enhances library. DO NOT USE IT. */
+    public static long openElf, findElfSymbol, closeElf;
 
     private Pine() {
         throw new RuntimeException("Use static methods");
@@ -424,26 +427,26 @@ public final class Pine {
     }
 
     static Object callBackupMethod(Member origin, Method backup, Object thisObject, Object[] args) throws InvocationTargetException, IllegalAccessException {
-        if (PineConfig.sdkLevel >= Build.VERSION_CODES.N) {
-            // On Android 7.0+, java.lang.Class object is movable and may cause crash when
-            // invoke backup method, so we update declaring_class when invoke backup method.
-            Class<?> declaring = origin.getDeclaringClass();
-            updateDeclaringClass(origin, backup);
-            //Runtime.getRuntime().gc();
-            Object result = backup.invoke(thisObject, args);
+        // java.lang.Class object is movable and may cause crash when invoke backup method,
+        // native entry of JNI method may be changed by RegisterNatives and UnregisterNatives,
+        // so we need to update them when invoke backup method.
 
-            // Explicit use declaring_class object to ensure it has reference on stack
-            // and avoid being moved by gc.
-            declaring.getClass();
-            return result;
-        } else {
-            return backup.invoke(thisObject, args);
-        }
+        Class<?> declaring = origin.getDeclaringClass();
+        syncMethodInfo(origin, backup);
+        // FIXME: GC happens here (you can add Runtime.getRuntime().gc() to test) will crash backup calling
+        Object result = backup.invoke(thisObject, args);
+        // Explicit use declaring_class object to ensure it has reference on stack
+        // and avoid being moved by gc. (invalid for now)
+        declaring.getClass();
+        return result;
     }
 
     /**
      * Invoke the original implementation of the given method.
-     * If the method is not hooked, just invoke it directly.
+     * If the method is not hooked, the behavior is undefined. Now Pine will try to directly invoke it,
+     *   but if other threads hooked the given method between we check if the method is hooked
+     *   and invoke it directly, this call will be intercepted and the registered hooks will be
+     *   triggered. DO NOT RELY ON THIS UNRELIABLE INTERNAL BEHAVIOR.
      * @param method The method you want to invoke its original implementation.
      * @param thisObject  The object the underlying method is invoked from
      * @param args The arguments used for the method call
@@ -468,14 +471,17 @@ public final class Pine {
 
         HookRecord hookRecord = sHookRecords.get(getArtMethod(method));
         if (hookRecord == null) {
-            // Not hooked
+            // Not hooked, try to invoke it directly (but it may have side effect)
+            if (PineConfig.debug)
+                Log.w(TAG, "Attempting to invoke original implementation on a not-hooked method " + method
+                    + ". This is undefined behavior and may have side effect (e.g. if other threads hooked "
+                    + "the method before we actually call Method.invoke(), the registered hooks will be triggered).", new Throwable("here"));
             if (method instanceof Constructor) {
                 if (thisObject != null)
                     throw new IllegalArgumentException(
                             "Cannot invoke a not hooked Constructor with a non-null receiver");
                 try {
-                    ((Constructor<?>) method).newInstance(args);
-                    return null;
+                    return ((Constructor<?>) method).newInstance(args);
                 } catch (InstantiationException e) {
                     throw new IllegalArgumentException("invalid Constructor", e);
                 }
@@ -490,8 +496,8 @@ public final class Pine {
             // I think we don't need makeClassesVisiblyInitialized here
             assert method instanceof Method;
             resolve((Method) method);
-//            if (PineConfig.sdkLevel >= 30) {
-//                makeClassesVisiblyInitialized(thread);
+//            if (PineConfig.sdkLevel >= Build.VERSION_CODES.R) {
+//                makeClassesVisiblyInitialized(currentArtThread0());
 //            }
         }
 
@@ -729,7 +735,7 @@ public final class Pine {
 
     private static native void enableFastNative();
 
-    private static native long getArtMethod(Member method);
+    public static native long getArtMethod(Member method);
 
     private static native Method hook0(long thread, Class<?> declaring, Member target, Method bridge,
                                        boolean isInlineHook, boolean jni, boolean proxy);
@@ -754,7 +760,7 @@ public final class Pine {
 
     public static native void getArgsX86(int extras, int[] out, int ebx);
 
-    private static native void updateDeclaringClass(Member origin, Method backup);
+    private static native void syncMethodInfo(Member origin, Method backup);
 
     public static native long currentArtThread0();
 

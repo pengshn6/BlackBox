@@ -9,7 +9,7 @@ buildscript {
 //        maven { url 'https://dl.bintray.com/umsdk/release' }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.0.1"
+        classpath 'com.android.tools.build:gradle:7.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -33,6 +33,9 @@ ext {
     compileSdkVersion = 30
     buildToolsVersion = "28.0.2"
     targetSdkVersion = 30
+
+    ndkVersion = "23.1.7779620"
+    cmakeVersion = "3.18.1"
 
     versionName = '1.0'
     versionCode = 1

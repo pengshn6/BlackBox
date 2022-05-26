@@ -11,10 +11,10 @@
 #include "utils/scoped_local_ref.h"
 #include "utils/log.h"
 #include "utils/jni_helper.h"
-#include "trampoline/extras.h"
 #include "utils/memory.h"
 #include "utils/well_known_classes.h"
 #include "trampoline/trampoline_installer.h"
+#include "trampoline/extras.h"
 
 using namespace pine;
 
@@ -35,6 +35,37 @@ bool PineConfig::debug = false;
 bool PineConfig::debuggable = false;
 bool PineConfig::anti_checks = false;
 bool PineConfig::jit_compilation_allowed = true;
+
+EXPORT_C void PineSetAndroidVersion(int version) {
+    Android::version = version;
+}
+
+EXPORT_C void* PineOpenElf(const char* elf) {
+    return new ElfImg(elf);
+}
+
+EXPORT_C void PineCloseElf(void* handle) {
+    delete static_cast<ElfImg*>(handle);
+}
+
+EXPORT_C void* PineGetElfSymbolAddress(void* handle, const char* symbol, bool warn_if_missing) {
+    return static_cast<ElfImg*>(handle)->GetSymbolAddress(symbol, warn_if_missing);
+}
+
+EXPORT_C bool PineNativeInlineHookSymbolNoBackup(const char* elf, const char* symbol, void* replace) {
+    ElfImg handle(elf);
+    void* addr = handle.GetSymbolAddress(symbol);
+    if (UNLIKELY(!addr)) return false;
+    return TrampolineInstaller::GetOrInitDefault()->NativeHookNoBackup(addr, replace);
+}
+
+EXPORT_C void PineNativeInlineHookFuncNoBackup(void* target, void* replace) {
+    TrampolineInstaller::GetOrInitDefault()->NativeHookNoBackup(target, replace);
+}
+
+EXPORT_C void PineFillWithNop(void* target, size_t size) {
+    TrampolineInstaller::GetOrInitDefault()->FillWithNop(target, size);
+}
 
 void Pine_init0(JNIEnv* env, jclass Pine, jint androidVersion, jboolean debug, jboolean debuggable,
         jboolean antiChecks, jboolean disableHiddenApiPolicy, jboolean disableHiddenApiPolicyForPlatformDomain) {
@@ -95,7 +126,15 @@ void Pine_init0(JNIEnv* env, jclass Pine, jint androidVersion, jboolean debug, j
         }
     }
 
-    env->SetStaticIntField(Pine, env->GetStaticFieldID(Pine, "arch", "I"), kCurrentArch);
+#define SET_JAVA_VALUE(name, sig, value) \
+if (auto field = env->GetStaticFieldID(Pine, (name), (sig)); (sig)[0] == 'I') env->SetStaticIntField(Pine, field, (value)); \
+else env->SetStaticLongField(Pine, field, (value));
+
+    SET_JAVA_VALUE("arch", "I", kCurrentArch);
+    SET_JAVA_VALUE("openElf", "J", reinterpret_cast<jlong>(PineOpenElf));
+    SET_JAVA_VALUE("findElfSymbol", "J", reinterpret_cast<jlong>(PineGetElfSymbolAddress));
+    SET_JAVA_VALUE("closeElf", "J", reinterpret_cast<jlong>(PineCloseElf));
+#undef SET_JAVA_VALUE
 }
 
 jobject Pine_hook0(JNIEnv* env, jclass, jlong threadAddress, jclass declaring, jobject javaTarget,
@@ -357,13 +396,29 @@ void Pine_getArgsX86(JNIEnv* env, jclass, jint javaExtras, jintArray javaArray, 
 }
 #endif
 
-void Pine_updateDeclaringClass(JNIEnv* env, jclass, jobject javaOrigin, jobject javaBackup) {
+void Pine_syncMethodInfo(JNIEnv* env, jclass, jobject javaOrigin, jobject javaBackup) {
     auto origin = art::ArtMethod::FromReflectedMethod(env, javaOrigin);
     auto backup = art::ArtMethod::FromReflectedMethod(env, javaBackup);
-    uint32_t declaring_class = origin->GetDeclaringClass();
-    if (declaring_class != backup->GetDeclaringClass()) {
-        LOGI("The declaring_class of method has moved by gc, update its reference in backup method.");
-        backup->SetDeclaringClass(declaring_class);
+
+    // ArtMethod is actually an instance of java class "java.lang.reflect.ArtMethod" on pre M
+    // declaring_class is a reference field so the runtime itself will update it if moved by GC
+    if (Android::version >= Android::kM) {
+        uint32_t declaring_class = origin->GetDeclaringClass();
+        if (declaring_class != backup->GetDeclaringClass()) {
+            LOGI("GC moved declaring class of method %p, also update in backup %p", origin, backup);
+            backup->SetDeclaringClass(declaring_class);
+        }
+    }
+
+    // JNI method entry may be changed by RegisterNatives or UnregisterNatives
+    // Use backup to check native as we may add kNative to access flags of origin (Android 8.0+ with debuggable mode)
+    if (backup->IsNative()) {
+        void* previous = backup->GetEntryPointFromJni();
+        void* current = origin->GetEntryPointFromJni();
+        if (current != previous) {
+            LOGI("Native entry of method %p was changed, also update in backup %p", origin, backup);
+            backup->SetEntryPointFromJni(current);
+        }
     }
 }
 
@@ -392,7 +447,7 @@ static const struct {
     const char* signature;
 } gFastNativeMethods[] = {
         {"getArtMethod", "(Ljava/lang/reflect/Member;)J"},
-        {"updateDeclaringClass", "(Ljava/lang/reflect/Member;Ljava/lang/reflect/Method;)V"},
+        {"syncMethodInfo", "(Ljava/lang/reflect/Member;Ljava/lang/reflect/Method;)V"},
         {"decompile0", "(Ljava/lang/reflect/Member;Z)Z"},
         {"disableJitInline0", "()Z"},
         {"setJitCompilationAllowed0", "(Z)V"},
@@ -431,7 +486,7 @@ static const JNINativeMethod gMethods[] = {
         {"disableJitInline0", "()Z", (void*) Pine_disableJitInline0},
         {"setJitCompilationAllowed0", "(Z)V", (void*) Pine_setJitCompilationAllowed},
         {"disableProfileSaver0", "()Z", (void*) Pine_disableProfileSaver0},
-        {"updateDeclaringClass", "(Ljava/lang/reflect/Member;Ljava/lang/reflect/Method;)V", (void*) Pine_updateDeclaringClass},
+        {"syncMethodInfo", "(Ljava/lang/reflect/Member;Ljava/lang/reflect/Method;)V", (void*) Pine_syncMethodInfo},
         {"getObject0", "(JJ)Ljava/lang/Object;", (void*) Pine_getObject0},
         {"getAddress0", "(JLjava/lang/Object;)J", (void*) Pine_getAddress0},
         {"setDebuggable0", "(Z)V", (void*) Pine_setDebuggable},
@@ -450,35 +505,4 @@ static const JNINativeMethod gMethods[] = {
 
 bool register_Pine(JNIEnv* env, jclass Pine) {
     return LIKELY(env->RegisterNatives(Pine, gMethods, NELEM(gMethods)) == JNI_OK);
-}
-
-EXPORT_C void PineSetAndroidVersion(int version) {
-    Android::version = version;
-}
-
-EXPORT_C void* PineOpenElf(const char* elf) {
-    return new ElfImg(elf);
-}
-
-EXPORT_C void PineCloseElf(void* handle) {
-    delete static_cast<ElfImg*>(handle);
-}
-
-EXPORT_C void* PineGetElfSymbolAddress(void* handle, const char* symbol) {
-    return static_cast<ElfImg*>(handle)->GetSymbolAddress(symbol);
-}
-
-EXPORT_C bool PineNativeInlineHookSymbolNoBackup(const char* elf, const char* symbol, void* replace) {
-    ElfImg handle(elf);
-    void* addr = handle.GetSymbolAddress(symbol);
-    if (UNLIKELY(!addr)) return false;
-    return TrampolineInstaller::GetOrInitDefault()->NativeHookNoBackup(addr, replace);
-}
-
-EXPORT_C void PineNativeInlineHookFuncNoBackup(void* target, void* replace) {
-    TrampolineInstaller::GetOrInitDefault()->NativeHookNoBackup(target, replace);
-}
-
-EXPORT_C void PineFillWithNop(void* target, size_t size) {
-    TrampolineInstaller::GetOrInitDefault()->FillWithNop(target, size);
 }

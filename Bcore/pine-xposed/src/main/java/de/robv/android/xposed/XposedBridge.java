@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
+
 import top.canyie.pine.Pine;
 import top.canyie.pine.callback.MethodHook;
 import top.canyie.pine.xposed.PineXposed;
@@ -210,6 +211,8 @@ public final class XposedBridge {
 	/**
 	 * Basically the same as {@link Method#invoke}, but calls the original method
 	 * as it was before the interception by Xposed. Also, access permissions are not checked.
+	 * If the given method is not hooked, the behavior is undefined, Pine does not guarantee this
+	 * will always work and may crash on other Xposed framework implementations.
 	 *
 	 * <p class="caution">There are very few cases where this method is needed. A common mistake is
 	 * to replace a method and then invoke the original one based on dynamic conditions. This
