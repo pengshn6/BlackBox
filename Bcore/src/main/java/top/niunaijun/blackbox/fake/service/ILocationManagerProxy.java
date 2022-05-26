@@ -18,8 +18,9 @@ import top.niunaijun.blackbox.fake.frameworks.BLocationManager;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.MethodHook;
 import top.niunaijun.blackbox.fake.hook.ProxyMethod;
-import top.niunaijun.blackbox.utils.HackLocationUtils;
+import top.niunaijun.blackbox.fake.service.context.LocationListenerStub;
 import top.niunaijun.blackbox.utils.MethodParameterUtils;
+import top.niunaijun.blackbox.utils.Reflector;
 
 /**
  * Created by Milk on 4/8/21.
@@ -82,7 +83,12 @@ public class ILocationManagerProxy extends BinderInvocationStub {
             if (BLocationManager.isFakeLocationEnable()) {
                 Object listener = MethodParameterUtils.getFirstParamByInstance(args, ILocationListener.Stub.class);
                 if (listener != null) {
-                    HackLocationUtils.hackListener(listener);
+                    try {
+                        Reflector handler = Reflector.with(listener).field("mListener");
+                        handler.set(new LocationListenerStub().wrapper(handler.get()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             return method.invoke(who, args);

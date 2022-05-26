@@ -160,7 +160,7 @@ public class BlackBoxCore extends ClientConfiguration {
             }
         }
         PineConfig.debug = true;
-        PineConfig.debuggable = true;
+        PineConfig.debuggable = BuildConfig.DEBUG;
         HookManager.get().init();
     }
 
