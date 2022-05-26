@@ -2,7 +2,6 @@ package top.niunaijun.blackbox.fake.service;
 
 import android.content.Context;
 import android.location.ILocationListener;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.IInterface;
 import android.util.Log;
@@ -54,7 +53,7 @@ public class ILocationManagerProxy extends BinderInvocationStub {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-//        Log.d(TAG, "call: " + method.getName());
+        Log.d(TAG, "call: " + method.getName());
         MethodParameterUtils.replaceFirstAppPkg(args);
         return super.invoke(proxy, method, args);
     }
@@ -133,9 +132,9 @@ public class ILocationManagerProxy extends BinderInvocationStub {
         @Override
         protected Object hook(Object who, Method method, Object[] args) throws Throwable {
             if (BLocationManager.isFakeLocationEnable()) {
-                Object listener = MethodParameterUtils.getFirstParamByInstance(args, LocationListener.class);
-                if (listener != null) {
-                    BLocationManager.get().requestLocationUpdates(((IInterface) listener).asBinder());
+                if (args[1] instanceof IInterface) {
+                    IInterface listener = (IInterface) args[1];
+                    BLocationManager.get().requestLocationUpdates(listener.asBinder());
                     return 0;
                 }
             }
