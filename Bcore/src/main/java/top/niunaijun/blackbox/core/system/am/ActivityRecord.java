@@ -6,6 +6,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.IBinder;
 
+import java.util.UUID;
+
 import top.niunaijun.blackbox.core.system.ProcessRecord;
 
 
@@ -27,6 +29,7 @@ public class ActivityRecord extends Binder {
     public int userId;
     public boolean finished;
     public ProcessRecord processRecord;
+    public String mBToken;
 
     public static ActivityRecord create(Intent intent, ActivityInfo info, IBinder resultTo, int userId) {
         ActivityRecord record = new ActivityRecord();
@@ -35,6 +38,7 @@ public class ActivityRecord extends Binder {
         record.component = new ComponentName(info.packageName, info.name);
         record.resultTo = resultTo;
         record.userId = userId;
+        record.mBToken = UUID.randomUUID().toString();
         return record;
     }
 

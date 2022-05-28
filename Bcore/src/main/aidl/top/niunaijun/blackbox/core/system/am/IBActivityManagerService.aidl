@@ -41,7 +41,7 @@ interface IBActivityManagerService {
     Intent sendBroadcast(in Intent intent, String resolvedType, int userId);
     IBinder peekService(in Intent intent, String resolvedType, int userId);
 
-    void onActivityCreated(int taskId, IBinder token, IBinder activityRecord);
+    void onActivityCreated(int taskId, IBinder token, String activityToken);
     void onActivityResumed(IBinder token);
     void onActivityDestroyed(IBinder token);
     void onFinishActivity(IBinder token);

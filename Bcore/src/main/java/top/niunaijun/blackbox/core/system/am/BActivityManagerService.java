@@ -112,16 +112,18 @@ public class BActivityManagerService extends IBActivityManagerService.Stub imple
     }
 
     @Override
-    public void onActivityCreated(int taskId, IBinder token, IBinder activityRecord) throws RemoteException {
+    public void onActivityCreated(int taskId, IBinder token, String activityToken) throws RemoteException {
         int callingPid = Binder.getCallingPid();
         ProcessRecord process = BProcessManagerService.get().findProcessByPid(callingPid);
         if (process == null) {
             return;
         }
-        ActivityRecord record = (ActivityRecord) activityRecord;
+
+        // crash by BinderProxy cast
+        // ActivityRecord record = (ActivityRecord) activityRecord;
         UserSpace userSpace = getOrCreateSpaceLocked(process.userId);
         synchronized (userSpace.mStack) {
-            userSpace.mStack.onActivityCreated(process, taskId, token, record);
+            userSpace.mStack.onActivityCreated(process, taskId, token, activityToken);
         }
     }
 

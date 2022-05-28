@@ -18,6 +18,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -56,7 +57,7 @@ public class ActivityStack {
 
     private final ActivityManager mAms;
     private final Map<Integer, TaskRecord> mTasks = new LinkedHashMap<>();
-    private final Set<ActivityRecord> mLaunchingActivities = new HashSet<>();
+    private final Map<String, ActivityRecord> mLaunchingActivities = new HashMap<>();
 
     public static final int LAUNCH_TIME_OUT = 0;
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -64,9 +65,9 @@ public class ActivityStack {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case LAUNCH_TIME_OUT:
-                    ActivityRecord record = (ActivityRecord) msg.obj;
-                    if (record != null) {
-                        mLaunchingActivities.remove(record);
+                    String token = (String) msg.obj;
+                    if (token != null) {
+                        mLaunchingActivities.remove(token);
                     }
                     break;
                 default:
@@ -108,7 +109,7 @@ public class ActivityStack {
         if (resolveInfo == null || resolveInfo.activityInfo == null) {
             return 0;
         }
-        Log.d(TAG, "startActivityLocked : " + resolveInfo.activityInfo);
+        Slog.d(TAG, "startActivityLocked : " + resolveInfo.activityInfo);
         ActivityInfo activityInfo = resolveInfo.activityInfo;
 
         ActivityRecord sourceRecord = findActivityRecordByToken(userId, resultTo);
@@ -175,7 +176,7 @@ public class ActivityStack {
                         ActivityRecord next = targetActivityRecord.task.activities.get(i);
                         if (next != targetActivityRecord) {
                             next.finished = true;
-                            Log.d(TAG, "makerFinish: " + next.component.toString());
+                            Slog.d(TAG, "makerFinish: " + next.component.toString());
                         } else {
                             if (singleTop) {
                                 newIntentRecord = targetActivityRecord;
@@ -194,14 +195,14 @@ public class ActivityStack {
             if (ComponentUtils.intentFilterEquals(topActivityRecord.intent, intent)) {
                 newIntentRecord = topActivityRecord;
             } else {
-                synchronized (mLaunchingActivities) {
-                    for (ActivityRecord launchingActivity : mLaunchingActivities) {
-                        if (!launchingActivity.finished && launchingActivity.component.equals(intent.getComponent())) {
-                            // todo update onNewIntent from intent
-                            ignore = true;
-                        }
-                    }
-                }
+//                synchronized (mLaunchingActivities) {
+//                    for (ActivityRecord launchingActivity : mLaunchingActivities.values()) {
+//                        if (!launchingActivity.finished && launchingActivity.component.equals(intent.getComponent())) {
+//                            // todo update onNewIntent from intent
+//                            ignore = true;
+//                        }
+//                    }
+//                }
             }
         }
 
@@ -274,7 +275,7 @@ public class ActivityStack {
 
     private Intent startActivityProcess(int userId, Intent intent, ActivityInfo
             info, ActivityRecord record) {
-        ProxyActivityRecord stubRecord = new ProxyActivityRecord(userId, info, intent, record);
+        ProxyActivityRecord stubRecord = new ProxyActivityRecord(userId, info, intent, record.mBToken);
         ProcessRecord targetApp = BProcessManagerService.get().startProcessLocked(info.packageName, info.processName, userId, -1, Binder.getCallingPid());
         if (targetApp == null) {
             throw new RuntimeException("Unable to create process, name:" + info.name);
@@ -366,7 +367,7 @@ public class ActivityStack {
                 typedArray.recycle();
             }
         }
-        ProxyActivityRecord.saveStub(shadow, intent, target.mActivityInfo, target.mActivityRecord, target.mUserId);
+        ProxyActivityRecord.saveStub(shadow, intent, target.mActivityInfo, target.mActivityToken, target.mUserId);
         return shadow;
     }
 
@@ -389,9 +390,9 @@ public class ActivityStack {
                                      int userId) {
         ActivityRecord targetRecord = ActivityRecord.create(intent, info, resultTo, userId);
         synchronized (mLaunchingActivities) {
-            mLaunchingActivities.add(targetRecord);
-            Message obtain = Message.obtain(mHandler, LAUNCH_TIME_OUT, targetRecord);
-            mHandler.sendMessageDelayed(obtain, 2000);
+            mLaunchingActivities.put(targetRecord.mBToken, targetRecord);
+            Message obtain = Message.obtain(mHandler, LAUNCH_TIME_OUT, targetRecord.mBToken);
+            mHandler.sendMessageDelayed(obtain, 15000);
         }
         return targetRecord;
     }
@@ -455,10 +456,13 @@ public class ActivityStack {
     }
 
     public void onActivityCreated(ProcessRecord processRecord, int taskId, IBinder
-            token, ActivityRecord record) {
+            token, String activityToken) {
+        ActivityRecord record = mLaunchingActivities.get(activityToken);
+        if(record == null) return;
+
         synchronized (mLaunchingActivities) {
-            mLaunchingActivities.remove(record);
-            mHandler.removeMessages(LAUNCH_TIME_OUT, record);
+            mLaunchingActivities.remove(activityToken);
+            mHandler.removeMessages(LAUNCH_TIME_OUT, activityToken);
         }
         synchronized (mTasks) {
             synchronizeTasks();
@@ -472,7 +476,7 @@ public class ActivityStack {
             record.processRecord = processRecord;
             record.task = taskRecord;
             taskRecord.addTopActivity(record);
-            Log.d(TAG, "onActivityCreated : " + record.component.toString());
+            Slog.d(TAG, "onActivityCreated : " + record.component.toString());
         }
     }
 
@@ -483,7 +487,7 @@ public class ActivityStack {
             if (activityRecord == null) {
                 return;
             }
-            Log.d(TAG, "onActivityResumed : " + activityRecord.component.toString());
+            Slog.d(TAG, "onActivityResumed : " + activityRecord.component.toString());
             activityRecord.task.removeActivity(activityRecord);
             activityRecord.task.addTopActivity(activityRecord);
         }
@@ -497,7 +501,7 @@ public class ActivityStack {
                 return;
             }
             activityRecord.finished = true;
-            Log.d(TAG, "onActivityDestroyed : " + activityRecord.component.toString());
+            Slog.d(TAG, "onActivityDestroyed : " + activityRecord.component.toString());
             activityRecord.task.removeActivity(activityRecord);
         }
     }
@@ -510,7 +514,7 @@ public class ActivityStack {
                 return;
             }
             activityRecord.finished = true;
-            Log.d(TAG, "onFinishActivity : " + activityRecord.component.toString());
+            Slog.d(TAG, "onFinishActivity : " + activityRecord.component.toString());
         }
     }
 

@@ -175,9 +175,9 @@ public class BActivityManager extends BlackManager<IBActivityManagerService> {
         return null;
     }
 
-    public void onActivityCreated(int taskId, IBinder token, IBinder activityRecord) {
+    public void onActivityCreated(int taskId, IBinder token, String activityToken) {
         try {
-            getService().onActivityCreated(taskId, token, activityRecord);
+            getService().onActivityCreated(taskId, token, activityToken);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
