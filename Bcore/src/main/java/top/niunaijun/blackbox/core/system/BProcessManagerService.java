@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
-import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,6 +93,7 @@ public class BProcessManagerService implements ISystemService {
             synchronized (mProcessMap) {
                 mProcessMap.put(buid, bProcess);
             }
+
             if (!initAppProcessL(app)) {
                 //init process fail
                 bProcess.remove(processName);
@@ -102,10 +102,31 @@ public class BProcessManagerService implements ISystemService {
             } else {
                 app.pid = getPid(BlackBoxCore.getContext(), ProxyManifest.getProcessName(app.bpid));
 
-                Log.d(TAG, "init pid = " + app.pid);
+                Slog.d(TAG, "init pid = " + app.pid);
             }
         }
         return app;
+    }
+
+    private void killProcess(final ProcessRecord app){
+        // make sure process be killed
+        if(app.pid > 0 ){
+            Process.killProcess(app.pid);
+        }else{
+            try {
+                ActivityManager manager = (ActivityManager) BlackBoxCore.getContext().getSystemService(Context.ACTIVITY_SERVICE);
+                List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = manager.getRunningAppProcesses();
+                for (ActivityManager.RunningAppProcessInfo runningAppProcess : runningAppProcesses) {
+                    int bpid = parseBPid(runningAppProcess.processName);
+                    if(bpid != -1 && app.bpid == bpid){
+                        Slog.d(TAG, "force kill process: "+app.processName+", pid: "+runningAppProcess.pid+", bpid: "+bpid);
+                        Process.killProcess(runningAppProcess.pid);
+                    }
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private int getUsingBPidL() {
@@ -156,7 +177,7 @@ public class BProcessManagerService implements ISystemService {
     }
 
     private boolean initAppProcessL(ProcessRecord record) {
-        Log.d(TAG, "initProcess: " + record.processName);
+        Slog.d(TAG, "initProcess: " + record.processName);
         AppConfig appConfig = record.getClientConfig();
         Bundle bundle = new Bundle();
         bundle.putParcelable(AppConfig.KEY, appConfig);
@@ -174,14 +195,14 @@ public class BProcessManagerService implements ISystemService {
     private void attachClientL(final ProcessRecord app, final IBinder appThread) {
         IBActivityThread activityThread = IBActivityThread.Stub.asInterface(appThread);
         if (activityThread == null) {
-            app.kill();
+            killProcess(app);
             return;
         }
         try {
             appThread.linkToDeath(new IBinder.DeathRecipient() {
                 @Override
                 public void binderDied() {
-                    Log.d(TAG, "App Died: " + app.processName);
+                    Slog.d(TAG, "App Died: " + app.processName);
                     appThread.unlinkToDeath(this, 0);
                     onProcessDie(app);
                 }
@@ -200,7 +221,7 @@ public class BProcessManagerService implements ISystemService {
 
     public void onProcessDie(ProcessRecord record) {
         synchronized (mProcessLock) {
-            record.kill();
+            killProcess(record);
             Map<String, ProcessRecord> process = mProcessMap.get(record.buid);
             if (process != null) {
                 process.remove(record.processName);
@@ -235,8 +256,8 @@ public class BProcessManagerService implements ISystemService {
                     int appId1 = BUserHandle.getAppId(processRecord.buid);
                     if (appId == appId1) {
                         mProcessMap.remove(processRecord.buid);
+                        killProcess(processRecord);
                         tmp.remove(processRecord);
-                        processRecord.kill();
                     }
                 }
                 mPidsSelfLocked.clear();
@@ -252,7 +273,7 @@ public class BProcessManagerService implements ISystemService {
             if (process == null)
                 return;
             for (ProcessRecord value : process.values()) {
-                value.kill();
+                killProcess(value);
                 mPidsSelfLocked.remove(value);
             }
             mProcessMap.remove(buid);
