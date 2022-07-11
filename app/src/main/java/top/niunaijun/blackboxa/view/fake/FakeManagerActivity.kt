@@ -131,7 +131,7 @@ class FakeManagerActivity : BaseActivity() {
                 it.data?.let { data ->
                     val latitude = data.getDoubleExtra("latitude", 0.0)
                     val longitude = data.getDoubleExtra("longitude", 0.0)
-                    val pkg = data.getStringExtra("pkg")
+                    val pkg = data.getStringExtra("pkg")!!
 
                     viewModel.setPattern(currentUserID(), pkg, BLocationManager.OWN_MODE)
                     viewModel.setLocation(currentUserID(), pkg, BLocation(latitude, longitude))

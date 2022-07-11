@@ -347,7 +347,7 @@ public class BProcessManagerService implements ISystemService {
     }
 
     private static void createProc(ProcessRecord record) {
-        File cmdline = new File(BEnvironment.getProcDir(record.bpid), "cmdline");
+        File cmdline = new File(BEnvironment.getProcDir(), "cmdline");
         try {
             FileUtils.writeToFile(record.processName.getBytes(), cmdline);
         } catch (IOException ignored) {

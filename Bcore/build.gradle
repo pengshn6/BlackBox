@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -74,4 +75,9 @@ dependencies {
     implementation project(':Bcore:pine-core')
     implementation project(':Bcore:pine-xposed')
     implementation project(':Bcore:pine-xposed-res')
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

@@ -41,6 +41,10 @@ public class AppSystemEnv {
         // 华为
         sSystemPackages.add("com.huawei.webview");
 
+        // miui
+        sSystemPackages.add("com.miui.contentcatcher");
+        sSystemPackages.add("com.miui.catcherpatch");
+
         // oppo
         sSystemPackages.add("com.coloros.safecenter");
 
