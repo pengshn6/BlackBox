@@ -4,9 +4,11 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -45,7 +47,7 @@ import top.niunaijun.blackbox.utils.compat.BuildCompat;
  * 此处无Bug
  */
 public class HCallbackProxy implements IInjectHook, Handler.Callback {
-    public static final String TAG = "HCallbackStub";
+    public static final String TAG = "HCallbackProxy";
     private Handler.Callback mOtherCallback;
     private AtomicBoolean mBeing = new AtomicBoolean(false);
 
@@ -77,7 +79,8 @@ public class HCallbackProxy implements IInjectHook, Handler.Callback {
     public boolean handleMessage(@NonNull Message msg) {
         if (!mBeing.getAndSet(true)) {
             try {
-                if (BuildCompat.isPie()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//                    Log.d(TAG, "BuildCompat.isPie()");
                     if (msg.what == BRActivityThreadH.get().EXECUTE_TRANSACTION()) {
                         if (handleLaunchActivity(msg.obj)) {
                             getH().sendMessageAtFrontOfQueue(Message.obtain(msg));
