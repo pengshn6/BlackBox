@@ -117,20 +117,20 @@ public class HookManager {
             addInjector(new IWifiScannerProxy());
             addInjector(new IBluetoothManagerProxy());
             // 12.0
-            if (BuildCompat.isS()) {
+            if (Build.VERSION.SDK_INT >= 31) {
                 addInjector(new IActivityClientProxy(null));
                 addInjector(new IVpnManagerProxy());
             }
             // 11.0
-            if (BuildCompat.isR()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 addInjector(new IPermissionManagerProxy());
             }
             // 10.0
-            if (BuildCompat.isQ()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 addInjector(new IActivityTaskManagerProxy());
             }
             // 9.0
-            if (BuildCompat.isPie()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 addInjector(new ISystemUpdateProxy());
             }
             // 8.0
