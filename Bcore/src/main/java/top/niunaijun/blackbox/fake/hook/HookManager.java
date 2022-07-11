@@ -1,5 +1,6 @@
 package top.niunaijun.blackbox.fake.hook;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -133,7 +134,7 @@ public class HookManager {
                 addInjector(new ISystemUpdateProxy());
             }
             // 8.0
-            if (BuildCompat.isOreo()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 addInjector(new IAutofillManagerProxy());
                 addInjector(new IDeviceIdentifiersPolicyProxy());
                 addInjector(new IStorageStatsManagerProxy());
