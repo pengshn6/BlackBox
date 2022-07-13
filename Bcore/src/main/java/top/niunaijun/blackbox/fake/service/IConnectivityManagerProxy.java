@@ -6,6 +6,7 @@ import black.android.net.BRIConnectivityManagerStub;
 import black.android.os.BRServiceManager;
 import top.niunaijun.blackbox.fake.hook.BinderInvocationStub;
 import top.niunaijun.blackbox.fake.hook.ScanClass;
+import top.niunaijun.blackbox.fake.service.base.ValueMethodProxy;
 
 /**
  * Created by Milk on 4/12/21.
@@ -15,7 +16,7 @@ import top.niunaijun.blackbox.fake.hook.ScanClass;
  * しーＪ
  * 此处无Bug
  */
-@ScanClass(VpnCommonProxy.class)
+
 public class IConnectivityManagerProxy extends BinderInvocationStub {
     public static final String TAG = "IConnectivityManagerProxy";
 
@@ -31,6 +32,13 @@ public class IConnectivityManagerProxy extends BinderInvocationStub {
     @Override
     protected void inject(Object baseInvocation, Object proxyInvocation) {
         replaceSystemService(Context.CONNECTIVITY_SERVICE);
+    }
+
+    @Override
+    protected void onBindMethod() {
+        super.onBindMethod();
+        addMethodHook(new ValueMethodProxy("getAllNetworkInfo", null));
+        addMethodHook(new ValueMethodProxy("getAllNetworks",null));
     }
 
     @Override

@@ -66,7 +66,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
  */
 @ScanClass(ActivityManagerCommonProxy.class)
 public class IActivityManagerProxy extends ClassInvocationStub {
-    public static final String TAG = "ActivityManagerStub";
+    public static final String TAG = "IActivityManagerProxy";
 
     @Override
     protected Object getWho() {
@@ -110,7 +110,7 @@ public class IActivityManagerProxy extends ClassInvocationStub {
             int authIndex = getAuthIndex();
             Object auth = args[authIndex];
             Object content = null;
-
+            Log.d(TAG, "innovate getContentProvider: " + auth);
             if (auth instanceof String) {
                 if (ProxyManifest.isProxy((String) auth)) {
                     return method.invoke(who, args);

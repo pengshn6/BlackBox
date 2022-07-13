@@ -38,6 +38,8 @@ public class NativeCore {
 
     public static native void addIORule(String targetPath, String relocatePath);
 
+    private static native void nativeIORedirect(String origPath, String newPath);
+
     public static native void hideXposed();
 
     public static void dumpDex(ClassLoader classLoader, String packageName) {
