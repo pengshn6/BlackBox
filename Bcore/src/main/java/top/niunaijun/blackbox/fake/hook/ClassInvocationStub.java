@@ -1,5 +1,6 @@
 package top.niunaijun.blackbox.fake.hook;
 
+import android.os.Build;
 import android.text.TextUtils;
 
 import java.lang.reflect.InvocationHandler;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import top.niunaijun.blackbox.utils.MethodParameterUtils;
+import top.niunaijun.blackbox.utils.Slog;
 
 /**
  * Created by Milk on 3/30/21.
@@ -70,8 +72,16 @@ public abstract class ClassInvocationStub implements InvocationHandler, IInjectH
     }
 
     protected void initAnnotation(Class<?> clazz) {
+        // get proxy method annotation
         ProxyMethod proxyMethod = clazz.getAnnotation(ProxyMethod.class);
         if (proxyMethod != null) {
+            ProxyVersion proxyVersion = clazz.getAnnotation(ProxyVersion.class);
+//            Slog.d(TAG + " Build.VERSION.SDK_INT ", String.valueOf(Build.VERSION.SDK_INT));
+            if (proxyVersion != null) {
+                if (Build.VERSION.SDK_INT < proxyVersion.lower() && Build.VERSION.SDK_INT > proxyVersion.upper()) {
+                    return;
+                }
+            }
             final String name = proxyMethod.value();
             if (!TextUtils.isEmpty(name)) {
                 try {
