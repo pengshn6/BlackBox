@@ -46,6 +46,11 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+    defaultConfig {
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+    }
     lintOptions {
         checkReleaseBuilds false
         abortOnError false
@@ -54,6 +59,16 @@ android {
         textOutput "stdout"
         textReport false
         check 'NewApi', 'InlinedApi'
+    }
+    packagingOptions {
+//        pickFirst '**/libshadowhook.so'
+//        exclude '**/libshadowhook.so'
+        jniLibs {
+            pickFirsts += ['**/libshadowhook.so']
+        }
+    }
+    buildFeatures {
+        prefab true
     }
 }
 
@@ -68,6 +83,7 @@ tasks.withType(Javadoc) {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.bytedance.android:shadowhook:1.0.3'
 
     implementation "com.github.CodingGay.BlackReflection:core:$rootProject.ext.blackReflection"
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'

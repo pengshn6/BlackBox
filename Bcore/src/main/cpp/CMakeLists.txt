@@ -4,7 +4,8 @@
 # Sets the minimum version of CMake required to build the native library.
 
 cmake_minimum_required(VERSION 3.4.1)
-
+enable_language(ASM)
+project(blackbox)
 find_package(shadowhook REQUIRED CONFIG)
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -53,4 +54,5 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib}
         z
+        shadowhook::shadowhook
         )

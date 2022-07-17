@@ -44,8 +44,8 @@ public abstract class ClassInvocationStub implements InvocationHandler, IInjectH
         return mBase;
     }
 
-    protected void onlyProxy(boolean o) {
-        onlyProxy = o;
+    protected void onlyProxy(boolean onlyStatus) {
+        onlyProxy = onlyStatus;
     }
 
     @Override
@@ -75,13 +75,13 @@ public abstract class ClassInvocationStub implements InvocationHandler, IInjectH
         // get proxy method annotation
         ProxyMethod proxyMethod = clazz.getAnnotation(ProxyMethod.class);
         if (proxyMethod != null) {
-            ProxyVersion proxyVersion = clazz.getAnnotation(ProxyVersion.class);
-//            Slog.d(TAG + " Build.VERSION.SDK_INT ", String.valueOf(Build.VERSION.SDK_INT));
-            if (proxyVersion != null) {
-                if (Build.VERSION.SDK_INT < proxyVersion.lower() && Build.VERSION.SDK_INT > proxyVersion.upper()) {
-                    return;
-                }
-            }
+//            ProxyVersion proxyVersion = clazz.getAnnotation(ProxyVersion.class);
+////            Slog.d(TAG + " Build.VERSION.SDK_INT ", String.valueOf(Build.VERSION.SDK_INT));
+//            if (proxyVersion != null) {
+//                if (Build.VERSION.SDK_INT < proxyVersion.lower() && Build.VERSION.SDK_INT > proxyVersion.upper()) {
+//                    return;
+//                }
+//            }
             final String name = proxyMethod.value();
             if (!TextUtils.isEmpty(name)) {
                 try {
