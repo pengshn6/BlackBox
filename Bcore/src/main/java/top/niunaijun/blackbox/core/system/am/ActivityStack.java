@@ -20,6 +20,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -338,6 +339,29 @@ public class ActivityStack {
         return tasks.get(tasks.size() - 1).getTopActivityRecord();
     }
 
+    // 销毁进程
+    void processDied(ProcessRecord processRecord) {
+        synchronized (mTasks) {
+            synchronizeTasks();
+            for (int i = mTasks.size() - 1; i >= 0; i--) {
+                TaskRecord taskRecord = mTasks.get(i);
+                synchronized (taskRecord.activities) {
+                    Iterator<ActivityRecord> iterator = taskRecord.activities.iterator();
+                    while (iterator.hasNext()) {
+                        ActivityRecord activityRecord = iterator.next();
+                        if (activityRecord.processRecord.pid != processRecord.pid) {
+                            continue;
+                        }
+                        iterator.remove();
+                        if (taskRecord.activities.isEmpty()) {
+                            mTasks.remove(taskRecord.id);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private Intent getStartStubActivityIntentInner(Intent intent, int vpid,
                                                    int userId, ProxyActivityRecord target,
                                                    ActivityInfo activityInfo) {
@@ -459,7 +483,7 @@ public class ActivityStack {
     public void onActivityCreated(ProcessRecord processRecord, int taskId, IBinder
             token, String activityToken) {
         ActivityRecord record = mLaunchingActivities.get(activityToken);
-        if(record == null) return;
+        if (record == null) return;
 
         synchronized (mLaunchingActivities) {
             mLaunchingActivities.remove(activityToken);
@@ -480,6 +504,7 @@ public class ActivityStack {
             Slog.d(TAG, "onActivityCreated : " + record.component.toString());
         }
     }
+
     // bug: multiple activities belonged to same app.
     public void onActivityResumed(int userId, IBinder token) {
         synchronized (mTasks) {
