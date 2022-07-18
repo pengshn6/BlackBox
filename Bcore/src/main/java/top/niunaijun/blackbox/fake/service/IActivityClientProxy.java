@@ -52,8 +52,8 @@ public class IActivityClientProxy extends ClassInvocationStub {
     }
 
     @Override
-    public void onlyProxy(boolean o) {
-        super.onlyProxy(o);
+    public void onlyProxy(boolean only) {
+        super.onlyProxy(only);
     }
 
     @ProxyMethod("finishActivity")

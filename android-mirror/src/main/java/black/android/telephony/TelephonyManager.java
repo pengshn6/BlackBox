@@ -20,4 +20,7 @@ public interface TelephonyManager {
 
     @BStaticField
     IInterface sIPhoneSubInfo();
+
+    @BStaticField
+    IInterface sISub();
 }

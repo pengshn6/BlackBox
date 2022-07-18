@@ -130,6 +130,7 @@ public class ActivityStack {
         boolean clearTask = containsFlag(intent, Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         TaskRecord taskRecord = null;
+        Log.d(TAG, String.valueOf(activityInfo.launchMode));
         switch (activityInfo.launchMode) {
             case ActivityInfo.LAUNCH_SINGLE_TOP:
             case ActivityInfo.LAUNCH_MULTIPLE:
@@ -479,7 +480,7 @@ public class ActivityStack {
             Slog.d(TAG, "onActivityCreated : " + record.component.toString());
         }
     }
-
+    // bug: multiple activities belonged to same app.
     public void onActivityResumed(int userId, IBinder token) {
         synchronized (mTasks) {
             synchronizeTasks();
@@ -488,8 +489,10 @@ public class ActivityStack {
                 return;
             }
             Slog.d(TAG, "onActivityResumed : " + activityRecord.component.toString());
-            activityRecord.task.removeActivity(activityRecord);
-            activityRecord.task.addTopActivity(activityRecord);
+            synchronized (activityRecord.task.activities) {
+                activityRecord.task.removeActivity(activityRecord);
+                activityRecord.task.addTopActivity(activityRecord);
+            }
         }
     }
 
@@ -502,7 +505,9 @@ public class ActivityStack {
             }
             activityRecord.finished = true;
             Slog.d(TAG, "onActivityDestroyed : " + activityRecord.component.toString());
-            activityRecord.task.removeActivity(activityRecord);
+            synchronized (activityRecord.task.activities) {
+                activityRecord.task.removeActivity(activityRecord);
+            }
         }
     }
 

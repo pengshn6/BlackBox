@@ -40,6 +40,7 @@ import top.niunaijun.blackbox.fake.service.IPowerManagerProxy;
 import top.niunaijun.blackbox.fake.service.IShortcutManagerProxy;
 import top.niunaijun.blackbox.fake.service.IStorageManagerProxy;
 import top.niunaijun.blackbox.fake.service.IStorageStatsManagerProxy;
+import top.niunaijun.blackbox.fake.service.ISubProxy;
 import top.niunaijun.blackbox.fake.service.ISystemUpdateProxy;
 import top.niunaijun.blackbox.fake.service.ITelephonyManagerProxy;
 import top.niunaijun.blackbox.fake.service.ITelephonyRegistryProxy;
@@ -116,6 +117,8 @@ public class HookManager {
             addInjector(new IWifiManagerProxy());
             addInjector(new IWifiScannerProxy());
             addInjector(new IBluetoothManagerProxy());
+
+            addInjector(new ISubProxy());
             // 12.0
             if (Build.VERSION.SDK_INT >= 31) {
                 addInjector(new IActivityClientProxy(null));

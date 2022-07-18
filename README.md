@@ -64,6 +64,10 @@ This project distinguishes between 32-bit and 64-bit, it was compiled to 2 diffe
 ### App Cloner
 <img src="assets/multiw.gif" width="50%">
 
+### Fake Location
+
+Fake location base theory: forbid WPS(Wi-Fi Positioning System) and LBS(MPS), only provide modified GPS location server.
+
 ### API
 #### Get application list that were installed in BlackBox
 ```java
@@ -95,6 +99,9 @@ You can contribute to this project by making pull requests.
 1. Both Chinese and English commit message / comment are ok,  but you should elaborate on your code.
 2. Please follow the code style and design pattern of this project.
 3. Welcome everybody take part in this project.
+4. 
+## Known Issues
+* Death process restarting produce duplicated activities and process. Temporary solution: kill them all and restart application manually.
 
 ## Credits
 - [VirtualApp](https://github.com/asLody/VirtualApp)
