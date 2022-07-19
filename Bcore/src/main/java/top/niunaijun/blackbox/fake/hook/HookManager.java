@@ -80,7 +80,6 @@ public class HookManager {
     public void init() {
         if (BlackBoxCore.get().isBlackProcess() || BlackBoxCore.get().isServerProcess()) {
 
-            addInjector(new BuildProxy());
             addInjector(new IDisplayManagerProxy());
             addInjector(new OsStub());
 
@@ -126,6 +125,8 @@ public class HookManager {
             addInjector(new IVibratorServiceProxy());
             addInjector(new IPersistentDataBlockServiceProxy());
             addInjector(AppInstrumentation.get());
+
+            addInjector(new BuildProxy());
             // 12.0
             if (Build.VERSION.SDK_INT >= 31) {
                 addInjector(new IActivityClientProxy(null));
