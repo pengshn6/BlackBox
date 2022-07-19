@@ -126,17 +126,19 @@ public class HookManager {
             addInjector(new IPersistentDataBlockServiceProxy());
             addInjector(AppInstrumentation.get());
 
-//            addInjector(new BuildProxy());
+            addInjector(new BuildProxy());
             // 12.0
             if (Build.VERSION.SDK_INT >= 31) {
                 addInjector(new IActivityClientProxy(null));
                 addInjector(new IVpnManagerProxy());
             }
             // 11.0
+//            if (Build.VERSION.SDK_INT >= 30) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 addInjector(new IPermissionManagerProxy());
             }
             // 10.0
+//            if (Build.VERSION.SDK_INT >= 29) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 addInjector(new IActivityTaskManagerProxy());
             }
