@@ -126,7 +126,7 @@ public class HookManager {
             addInjector(new IPersistentDataBlockServiceProxy());
             addInjector(AppInstrumentation.get());
 
-            addInjector(new BuildProxy());
+//            addInjector(new BuildProxy());
             // 12.0
             if (Build.VERSION.SDK_INT >= 31) {
                 addInjector(new IActivityClientProxy(null));

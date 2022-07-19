@@ -1,6 +1,9 @@
 package top.niunaijun.blackbox.fake.service.libcore;
 
 import android.os.Process;
+import android.util.Log;
+
+import androidx.core.util.ObjectsCompat;
 
 import java.lang.reflect.Method;
 
@@ -57,9 +60,9 @@ public class OsStub extends ClassInvocationStub {
                 if (args[i] instanceof String && ((String) args[i]).startsWith("/")) {
                     String orig = (String) args[i];
                     args[i] = IOCore.get().redirectPath(orig);
-//                    if (!ObjectsCompat.equals(orig, args[i])) {
-//                        Log.d(TAG, "redirectPath: " + orig + "  => " + args[i]);
-//                    }
+                    if (!ObjectsCompat.equals(orig, args[i])) {
+                        Log.d(TAG, "redirectPath: " + orig + "  => " + args[i]);
+                    }
                 }
             }
         }

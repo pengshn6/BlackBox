@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.File;
 import java.util.HashMap;
@@ -37,15 +39,38 @@ public class IOCore {
     private static final IOCore sIOCore = new IOCore();
     private static final TrieTree mTrieTree = new TrieTree();
     private static final TrieTree sBlackTree = new TrieTree();
+    private static final int systemUserId = 0;
     private final Map<String, String> mRedirectMap = new LinkedHashMap<>();
-//    private final HashMap<String, String> mWhiteMap = new LinkedHashMap<>();
 
     private static final Map<String, Map<String, String>> sCachePackageRedirect = new HashMap<>();
 
     public static IOCore get() {
         return sIOCore;
     }
-    // 需要添加白名单，保证读取外部数据
+
+    // 添加黑名单，禁止黑名单中的路径重定向，保证读取外部数据，未测试成功
+    static {
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_PODCASTS));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_RINGTONES));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_ALARMS));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_NOTIFICATIONS));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_PICTURES));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_MOVIES));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_DOWNLOADS));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_DCIM));
+        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_MUSIC));
+
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_PODCASTS));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_RINGTONES));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_ALARMS));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_NOTIFICATIONS));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_PICTURES));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_MOVIES));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_DOWNLOADS));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_DCIM));
+        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_MUSIC));
+    }
+
     // /data/data/com.google/  ----->  /data/data/com.virtual/data/com.google/
     public void addRedirect(String origPath, String redirectPath) {
         if (TextUtils.isEmpty(origPath) || TextUtils.isEmpty(redirectPath) || mRedirectMap.get(origPath) != null)
@@ -67,6 +92,7 @@ public class IOCore {
     }
 
     public String redirectPath(String path) {
+
         if (TextUtils.isEmpty(path))
             return path;
         if (path.contains("/blackbox/")) {

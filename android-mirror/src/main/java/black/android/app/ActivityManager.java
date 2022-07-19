@@ -3,6 +3,7 @@ package black.android.app;
 
 import top.niunaijun.blackreflection.annotation.BClassName;
 import top.niunaijun.blackreflection.annotation.BStaticField;
+import top.niunaijun.blackreflection.annotation.BStaticMethod;
 
 @BClassName("android.app.ActivityManager")
 public interface ActivityManager {
@@ -17,4 +18,7 @@ public interface ActivityManager {
 
     @BStaticField
     int START_TASK_TO_FRONT();
+
+    @BStaticMethod
+    int getCurrentUser();
 }
