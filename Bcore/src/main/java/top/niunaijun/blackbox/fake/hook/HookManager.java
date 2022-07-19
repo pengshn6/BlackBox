@@ -8,6 +8,7 @@ import java.util.Map;
 
 import top.niunaijun.blackbox.BlackBoxCore;
 import top.niunaijun.blackbox.fake.delegate.AppInstrumentation;
+import top.niunaijun.blackbox.fake.service.BuildProxy;
 import top.niunaijun.blackbox.fake.service.HCallbackProxy;
 import top.niunaijun.blackbox.fake.service.IAccessibilityManagerProxy;
 import top.niunaijun.blackbox.fake.service.IAccountManagerProxy;
@@ -78,12 +79,29 @@ public class HookManager {
 
     public void init() {
         if (BlackBoxCore.get().isBlackProcess() || BlackBoxCore.get().isServerProcess()) {
+
+            addInjector(new BuildProxy());
             addInjector(new IDisplayManagerProxy());
             addInjector(new OsStub());
+
+
+            addInjector(new ILocationManagerProxy());
+            // AM and PM hook
             addInjector(new IActivityManagerProxy());
             addInjector(new IPackageManagerProxy());
             addInjector(new ITelephonyManagerProxy());
             addInjector(new HCallbackProxy());
+
+            /*
+             * It takes time to test and enhance the compatibility of WifiManager
+             * (only tested in Android 10).
+             * commented by BlackBoxing at 2022/03/08
+             * */
+            addInjector(new IWifiManagerProxy());
+            addInjector(new IWifiScannerProxy());
+            addInjector(new IBluetoothManagerProxy());
+
+            addInjector(new ISubProxy());
             addInjector(new IAppOpsManagerProxy());
             addInjector(new INotificationManagerProxy());
             addInjector(new IAlarmManagerProxy());
@@ -93,7 +111,6 @@ public class HookManager {
             addInjector(new IUserManagerProxy());
             addInjector(new RestrictionsManagerStub());
             addInjector(new IMediaSessionManagerProxy());
-            addInjector(new ILocationManagerProxy());
             addInjector(new IStorageManagerProxy());
             addInjector(new ILauncherAppsProxy());
             addInjector(new IJobServiceProxy());
@@ -109,16 +126,6 @@ public class HookManager {
             addInjector(new IVibratorServiceProxy());
             addInjector(new IPersistentDataBlockServiceProxy());
             addInjector(AppInstrumentation.get());
-            /*
-            * It takes time to test and enhance the compatibility of WifiManager
-            * (only tested in Android 10).
-            * commented by BlackBoxing at 2022/03/08
-            * */
-            addInjector(new IWifiManagerProxy());
-            addInjector(new IWifiScannerProxy());
-            addInjector(new IBluetoothManagerProxy());
-
-            addInjector(new ISubProxy());
             // 12.0
             if (Build.VERSION.SDK_INT >= 31) {
                 addInjector(new IActivityClientProxy(null));

@@ -38,13 +38,14 @@ public class IOCore {
     private static final TrieTree mTrieTree = new TrieTree();
     private static final TrieTree sBlackTree = new TrieTree();
     private final Map<String, String> mRedirectMap = new LinkedHashMap<>();
+//    private final HashMap<String, String> mWhiteMap = new LinkedHashMap<>();
 
     private static final Map<String, Map<String, String>> sCachePackageRedirect = new HashMap<>();
 
     public static IOCore get() {
         return sIOCore;
     }
-
+    // 需要添加白名单，保证读取外部数据
     // /data/data/com.google/  ----->  /data/data/com.virtual/data/com.google/
     public void addRedirect(String origPath, String redirectPath) {
         if (TextUtils.isEmpty(origPath) || TextUtils.isEmpty(redirectPath) || mRedirectMap.get(origPath) != null)
