@@ -26,6 +26,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.WebView;
 
 import java.io.File;
@@ -87,6 +88,7 @@ import top.niunaijun.blackbox.utils.compat.StrictModeCompat;
  * 丶　つ０
  * しーＪ
  * 此处无Bug
+ * 替换Activity H中的currentActivityThread
  */
 public class BActivityThread extends IBActivityThread.Stub {
     public static final String TAG = "BActivityThread";
@@ -404,6 +406,7 @@ public class BActivityThread extends IBActivityThread.Stub {
                     if (processName.equals(providerInfo.processName) ||
                             providerInfo.processName.equals(context.getPackageName()) || providerInfo.multiprocess) {
                         installProvider(BlackBoxCore.mainThread(), context, providerInfo, null);
+                        Log.d(TAG, providerInfo.authority);
                     }
                 } catch (Throwable ignored) {
                 }

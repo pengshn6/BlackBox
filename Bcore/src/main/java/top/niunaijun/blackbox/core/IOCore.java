@@ -39,7 +39,7 @@ public class IOCore {
     private static final IOCore sIOCore = new IOCore();
     private static final TrieTree mTrieTree = new TrieTree();
     private static final TrieTree sBlackTree = new TrieTree();
-    private static final int systemUserId = 0;
+    private static final int systemUserId = BlackBoxCore.getHostUserId();;
     private final Map<String, String> mRedirectMap = new LinkedHashMap<>();
 
     private static final Map<String, Map<String, String>> sCachePackageRedirect = new HashMap<>();
@@ -48,29 +48,7 @@ public class IOCore {
         return sIOCore;
     }
 
-    // 添加黑名单，禁止黑名单中的路径重定向，保证读取外部数据，未测试成功
-    static {
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_PODCASTS));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_RINGTONES));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_ALARMS));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_NOTIFICATIONS));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_PICTURES));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_MOVIES));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_DOWNLOADS));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_DCIM));
-        sBlackTree.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_MUSIC));
-
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_PODCASTS));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_RINGTONES));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_ALARMS));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_NOTIFICATIONS));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_PICTURES));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_MOVIES));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_DOWNLOADS));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_DCIM));
-        sBlackTree.add(String.format("/sdcard/%s", Environment.DIRECTORY_MUSIC));
-    }
-
+    // 路径前缀匹配，重定向
     // /data/data/com.google/  ----->  /data/data/com.virtual/data/com.google/
     public void addRedirect(String origPath, String redirectPath) {
         if (TextUtils.isEmpty(origPath) || TextUtils.isEmpty(redirectPath) || mRedirectMap.get(origPath) != null)
@@ -89,6 +67,7 @@ public class IOCore {
         if (TextUtils.isEmpty(path))
             return;
         sBlackTree.add(path);
+        NativeCore.addWhiteList(path);
     }
 
     public String redirectPath(String path) {
@@ -162,6 +141,24 @@ public class IOCore {
 
                 blackRule.add("/sdcard/Pictures");
                 blackRule.add(String.format("/storage/emulated/%d/Pictures", systemUserId));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_PODCASTS));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_RINGTONES));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_ALARMS));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_NOTIFICATIONS));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_PICTURES));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_MOVIES));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_DOWNLOADS));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_DCIM));
+                blackRule.add(String.format("/storage/emulated/%d/%s", systemUserId, Environment.DIRECTORY_MUSIC));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_PODCASTS));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_RINGTONES));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_ALARMS));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_NOTIFICATIONS));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_PICTURES));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_MOVIES));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_DOWNLOADS));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_DCIM));
+                blackRule.add(String.format("/sdcard/%s", Environment.DIRECTORY_MUSIC));
             }
             if (BlackBoxCore.get().isHideRoot()) {
                 hideRoot(rule);
@@ -176,7 +173,7 @@ public class IOCore {
         for (String s : blackRule) {
             get().addBlackRedirect(s);
         }
-        NativeCore.enableIO();
+//        NativeCore.enableIO();
     }
 
     private void hideRoot(Map<String, String> rule) {

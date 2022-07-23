@@ -46,7 +46,8 @@ int BoxCore::getCallingUid(JNIEnv *env, int orig) {
 
 jstring BoxCore::redirectPathString(JNIEnv *env, jstring path) {
     env = ensureEnvCreated();
-    return (jstring) env->CallStaticObjectMethod(VMEnv.NativeCoreClass, VMEnv.redirectPathString, path);
+    return (jstring) env->CallStaticObjectMethod(VMEnv.NativeCoreClass, VMEnv.redirectPathString,
+                                                 path);
 }
 
 jobject BoxCore::redirectPathFile(JNIEnv *env, jobject path) {
@@ -95,10 +96,16 @@ void init(JNIEnv *env, jobject clazz, jint api_level) {
     JniHook::InitJniHook(env, api_level);
 }
 
+// IO类添加重定向规则
 void addIORule(JNIEnv *env, jclass clazz, jstring target_path,
                jstring relocate_path) {
     IO::addRule(env->GetStringUTFChars(target_path, JNI_FALSE),
                 env->GetStringUTFChars(relocate_path, JNI_FALSE));
+}
+
+// IO类添加白名单规则
+void addWhiteList(JNIEnv *env, jclass clazz, jstring path) {
+    IO::addWhiteList(env->GetStringUTFChars(path, JNI_FALSE));
 }
 
 void enableIO(JNIEnv *env, jclass clazz) {
@@ -107,10 +114,11 @@ void enableIO(JNIEnv *env, jclass clazz) {
 }
 
 static JNINativeMethod gMethods[] = {
-        {"hideXposed", "()V",                                     (void *) hideXposed},
-        {"addIORule",  "(Ljava/lang/String;Ljava/lang/String;)V", (void *) addIORule},
-        {"enableIO",   "()V",                                     (void *) enableIO},
-        {"init",       "(I)V",                                    (void *) init},
+        {"hideXposed",   "()V",                                     (void *) hideXposed},
+        {"addIORule",    "(Ljava/lang/String;Ljava/lang/String;)V", (void *) addIORule},
+        {"enableIO",     "()V",                                     (void *) enableIO},
+        {"init",         "(I)V",                                    (void *) init},
+        {"addWhiteList", "(Ljava/lang/String;)V",                   (void *) addWhiteList},
 };
 
 int registerNativeMethods(JNIEnv *env, const char *className,
@@ -146,3 +154,4 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     registerMethod(env);
     return JNI_VERSION_1_6;
 }
+

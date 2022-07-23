@@ -16,6 +16,8 @@ import top.niunaijun.blackbox.utils.compat.DexFileCompat;
 
 import static top.niunaijun.blackbox.core.env.BEnvironment.EMPTY_JAR;
 
+import com.bytedance.shadowhook.ShadowHook;
+
 /**
  * Created by Milk on 4/9/21.
  * * ∧＿∧
@@ -30,11 +32,16 @@ public class NativeCore {
     static {
         new File("");
         System.loadLibrary("blackbox");
+        ShadowHook.init(new ShadowHook.ConfigBuilder()
+                .setMode(ShadowHook.Mode.SHARED)
+                .setDebuggable(true)
+                .build());
     }
-
     public static native void init(int apiLevel);
 
     public static native void enableIO();
+
+    public static native void addWhiteList(String path);
 
     public static native void addIORule(String targetPath, String relocatePath);
 

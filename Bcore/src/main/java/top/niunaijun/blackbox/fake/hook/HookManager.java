@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import top.niunaijun.blackbox.BlackBoxCore;
+import top.niunaijun.blackbox.core.NativeCore;
 import top.niunaijun.blackbox.fake.delegate.AppInstrumentation;
 import top.niunaijun.blackbox.fake.service.BuildProxy;
 import top.niunaijun.blackbox.fake.service.HCallbackProxy;
@@ -171,6 +172,7 @@ public class HookManager {
             }
         }
         injectAll();
+//        NativeCore.init(Build.VERSION.SDK_INT);
     }
 
     public void checkEnv(Class<?> clazz) {
