@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +23,8 @@ import top.niunaijun.blackbox.utils.compat.BundleCompat;
  * 此处无Bug
  */
 public class ProxyContentProvider extends ContentProvider {
+    public static final String TAG = "ProxyContentProvider";
+
     @Override
     public boolean onCreate() {
         return false;
@@ -46,28 +49,34 @@ public class ProxyContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+//        uri.toString();
+        Log.d(TAG, uri.toString());
         return null;
     }
 
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
+        Log.d(TAG, uri.toString());
         return null;
     }
 
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+        Log.d(TAG, uri.toString());
         return null;
     }
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        Log.d(TAG, uri.toString());
         return 0;
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) {
+        Log.d(TAG, uri.toString());
         return 0;
     }
 

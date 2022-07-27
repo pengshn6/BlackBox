@@ -172,7 +172,6 @@ public class HookManager {
             }
         }
         injectAll();
-//        NativeCore.init(Build.VERSION.SDK_INT);
     }
 
     public void checkEnv(Class<?> clazz) {

@@ -308,6 +308,7 @@ public class BActivityThread extends IBActivityThread.Stub {
         PackageInfo packageInfo = BlackBoxCore.getBPackageManager().getPackageInfo(packageName, PackageManager.GET_PROVIDERS, BActivityThread.getUserId());
         ApplicationInfo applicationInfo = packageInfo.applicationInfo;
         if (packageInfo.providers == null) {
+//            Log.d(TAG, "packageInfo.providers: null");
             packageInfo.providers = new ProviderInfo[]{};
         }
         mProviders.addAll(Arrays.asList(packageInfo.providers));
@@ -406,7 +407,7 @@ public class BActivityThread extends IBActivityThread.Stub {
                     if (processName.equals(providerInfo.processName) ||
                             providerInfo.processName.equals(context.getPackageName()) || providerInfo.multiprocess) {
                         installProvider(BlackBoxCore.mainThread(), context, providerInfo, null);
-                        Log.d(TAG, providerInfo.authority);
+                        Log.d(TAG, "providerInfo.authority: " + providerInfo.authority);
                     }
                 } catch (Throwable ignored) {
                 }

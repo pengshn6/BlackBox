@@ -66,39 +66,6 @@ const char *IO::redirectPath(const char *__path) {
     }
     return __path;
 }
-void *open_proxy(const char *__path) {
-    // 执行 stack 清理（不可省略），只需调用一次
-    SHADOWHOOK_STACK_SCOPE();
-    list<const char *>::iterator white_iterator;
-    for (white_iterator = white_rule.begin();
-         white_iterator != white_rule.end(); ++white_iterator) {
-        const char *info = *white_iterator;
-        if (strstr(__path, info)) {
-            return SHADOWHOOK_CALL_PREV(open_proxy, __path);
-        }
-    }
-    list<IO::RelocateInfo>::iterator iterator;
-    for (iterator = relocate_rule.begin(); iterator != relocate_rule.end(); ++iterator) {
-        IO::RelocateInfo info = *iterator;
-        if (strstr(__path, info.targetPath) && !strstr(__path, "/blackbox/")) {
-            log_print_debug("redirectPath %s  => %s", __path, info.relocatePath);
-            return SHADOWHOOK_CALL_PREV(open_proxy, info.relocatePath);
-        }
-    }
-    // 调用原函数
-    return SHADOWHOOK_CALL_PREV(open_proxy, __path);
-}
-
-//typedef ssize_t (*type_read)(int, void *const, size_t);
-using type_read= ssize_t (*)(int, void *const, size_t);
-
-static ssize_t shared_proxy_read(int fd, void *const buf, size_t count) {
-    // 执行 stack 清理（不可省略），只需调用一次
-    SHADOWHOOK_STACK_SCOPE();
-    ssize_t r = SHADOWHOOK_CALL_PREV(shared_proxy_read, fd, buf, count);
-    SHADOWHOOK_POP_STACK();
-    return r;
-}
 
 HOOK_JNI(void *, openat, int fd, const char *pathname, int flags, int mode){
     // 执行 stack 清理（不可省略），只需调用一次
@@ -121,33 +88,6 @@ HOOK_JNI(void *, openat, int fd, const char *pathname, int flags, int mode){
     }
     // 调用原函数
     return orig_openat(fd, pathname, flags, mode);
-}
-
-
-static void *shared_proxy_openat(int fd, const char *pathname, int flags, int mode) {
-
-    // 执行 stack 清理（不可省略），只需调用一次
-    SHADOWHOOK_STACK_SCOPE();
-    list<const char *>::iterator white_iterator;
-    for (white_iterator = white_rule.begin();
-         white_iterator != white_rule.end(); ++white_iterator) {
-        const char *info = *white_iterator;
-        if (strstr(pathname, info)) {
-            return SHADOWHOOK_CALL_PREV(shared_proxy_openat, fd, pathname, flags,
-                                        mode);
-        }
-    }
-    list<IO::RelocateInfo>::iterator iterator;
-    for (iterator = relocate_rule.begin(); iterator != relocate_rule.end(); ++iterator) {
-        IO::RelocateInfo info = *iterator;
-        if (strstr(pathname, info.targetPath) && !strstr(pathname, "/blackbox/")) {
-            log_print_debug("redirectPath %s  => %s", pathname, info.relocatePath);
-            return SHADOWHOOK_CALL_PREV(shared_proxy_openat, fd, info.relocatePath,
-                                        flags, mode);
-        }
-    }
-    // 调用原函数
-    return SHADOWHOOK_CALL_PREV(shared_proxy_openat, fd, pathname, flags, mode);
 }
 
 jstring IO::redirectPath(JNIEnv *env, jstring path) {
@@ -183,6 +123,6 @@ void IO::init(JNIEnv *env) {
     jclass tmpFile = env->FindClass("java/io/File");
     getAbsolutePathMethodId = env->GetMethodID(tmpFile, "getAbsolutePath", "()Ljava/lang/String;");
 //    shadowhook_hook_sym_name("libc.so", "open", (void *) shared_proxy_read, NULL);
-    shadowhook_hook_sym_name("libc.so", "openat", (void *) shared_proxy_openat, (void **)orig_openat);
+    shadowhook_hook_sym_name("libc.so", "openat", (void *) new_openat, (void **)&orig_openat);
 }
 

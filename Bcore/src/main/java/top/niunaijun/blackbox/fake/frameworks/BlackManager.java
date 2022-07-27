@@ -23,6 +23,7 @@ public abstract class BlackManager<Service extends IInterface> {
             return mService;
         }
         try {
+            // 通过反射调用T.Stub.asInterface
             mService = Reflector.on(getTClass().getName() + "$Stub").method("asInterface", IBinder.class)
                     .call(BlackBoxCore.get().getService(getServiceName()));
             mService.asBinder().linkToDeath(new IBinder.DeathRecipient() {

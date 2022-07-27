@@ -111,8 +111,18 @@ public class IActivityManagerProxy extends ClassInvocationStub {
             Object auth = args[authIndex];
             Object content = null;
             Log.d(TAG, "innovate getContentProvider: " + auth);
+//            try{
+//                BlackBoxCore.getBPackageManager().resolveContentProvider((String) auth, GET_META_DATA, BActivityThread.getUserId());
+//
+//            } catch (Exception e){
+//                Log.e(TAG, "BlackBoxCore.getBPackageManager().resolveContentProvider Failed");
+//                e.printStackTrace();
+//            }
+
+//            Log.d(TAG, "providerInfo.authority: " + providerInfo.authority);
             if (auth instanceof String) {
                 if (ProxyManifest.isProxy((String) auth)) {
+                    Log.d(TAG, "ProxyManifest.isProxy: " + auth);
                     return method.invoke(who, args);
                 }
 
@@ -126,7 +136,6 @@ public class IActivityManagerProxy extends ClassInvocationStub {
                     return content;
                 } else {
                     Log.d(TAG, "hook getContentProvider: " + auth);
-
                     ProviderInfo providerInfo = BlackBoxCore.getBPackageManager().resolveContentProvider((String) auth, GET_META_DATA, BActivityThread.getUserId());
                     if (providerInfo == null) {
 //                        Log.d(TAG, "hook system: " + auth);
@@ -141,7 +150,7 @@ public class IActivityManagerProxy extends ClassInvocationStub {
 //                                        .set(new SettingsProviderStub().wrapper((IInterface) provider, BlackBoxCore.getHostPkg()));
 //                            }
 //                        }
-                        return null;
+//                        return null;
                     }
 
                     Log.d(TAG, "hook app: " + auth);

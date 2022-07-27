@@ -173,7 +173,7 @@ public class IOCore {
         for (String s : blackRule) {
             get().addBlackRedirect(s);
         }
-//        NativeCore.enableIO();
+        NativeCore.enableIO();
     }
 
     private void hideRoot(Map<String, String> rule) {

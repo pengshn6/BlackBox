@@ -161,6 +161,7 @@ public class BlackBoxCore extends ClientConfiguration {
         }
         PineConfig.debug = true;
         PineConfig.debuggable = BuildConfig.DEBUG;
+        xcrash.XCrash.init(context);
         HookManager.get().init();
     }
 
