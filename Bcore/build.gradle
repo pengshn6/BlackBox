@@ -78,6 +78,7 @@ dependencies {
     implementation "com.github.CodingGay.BlackReflection:core:$rootProject.ext.blackReflection"
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
     implementation 'com.bytedance.android:shadowhook:1.0.3'
+    implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
 
     implementation project(':Bcore:black-fake')
     implementation project(':Bcore:black-hook')

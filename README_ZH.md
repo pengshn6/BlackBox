@@ -112,7 +112,7 @@
 * 死亡进程重启出现多进程问题，活动无法正常交互。临时解决方法：手动将目标进程都杀死，重启目标应用
 * vlc应用启动崩溃，96bd784版本正常启动
 * 火狐浏览器点击输入网址崩溃
-* provider存在问题
+* 调用content provider的getType崩溃
 
 ## 感谢
 - [VirtualApp](https://github.com/asLody/VirtualApp)
