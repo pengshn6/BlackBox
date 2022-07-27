@@ -68,6 +68,12 @@ This project distinguishes between 32-bit and 64-bit, it was compiled to 2 diffe
 
 Fake location base theory: forbid WPS(Wi-Fi Positioning System) and LBS(MPS), only provide modified GPS location server.
 
+### Fake Device Info
+Modify device info in source code, ui isn't available
+
+* Xiaomi device tested successfully.
+* Huawei device tested failed, it need to be enhanced.
+
 ### API
 #### Get application list that were installed in BlackBox
 ```java

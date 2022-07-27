@@ -24,7 +24,7 @@ import java.util.zip.ZipFile;
  * 此处无Bug
  */
 public class NativeUtils {
-    public static final String TAG = "VirtualM";
+    public static final String TAG = "NativeUtils";
 
     public static void copyNativeLib(File apk, File nativeLibDir) throws Exception {
         long startTime = System.currentTimeMillis();

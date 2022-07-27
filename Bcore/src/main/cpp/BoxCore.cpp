@@ -74,7 +74,7 @@ void nativeHook(JNIEnv *env) {
     UnixFileSystemHook::init(env);
     VMClassLoaderHook::init(env);
     SystemPropertiesHook::init(env);
-//    RuntimeHook::init(env);
+    RuntimeHook::init(env);
     BinderHook::init(env);
 }
 
@@ -111,9 +111,9 @@ void addWhiteList(JNIEnv *env, jclass clazz, jstring path) {
 }
 
 void enableIO(JNIEnv *env, jclass clazz) {
-    SystemPropertiesHook::init(env);
-//    IO::init(env);
-//    nativeHook(env);
+//    SystemPropertiesHook::init(env);
+    IO::init(env);
+    nativeHook(env);
 }
 
 static JNINativeMethod gMethods[] = {
