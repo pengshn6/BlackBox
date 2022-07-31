@@ -35,7 +35,7 @@ HOOK_JNI(int, __system_property_get, const char *name, char *value) {
     if (NULL == name || NULL == value) {
         return orig___system_property_get(name, value);
     }
-//    log_print_debug("calling __system_property_get");
+
     ALOGD(name, value);
     auto ret = prop_map.find(name);
     if (ret != prop_map.end()) {
@@ -65,6 +65,7 @@ void SystemPropertiesHook::init(JNIEnv *env) {
                         "native_get", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
                         (void *) new_native_get,
                         (void **) (&orig_native_get), true);
+
     shadowhook_hook_sym_name("libc.so", "__system_property_get", (void *) new___system_property_get,
                              (void **) (&orig___system_property_get));
 }

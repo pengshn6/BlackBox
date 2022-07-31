@@ -578,6 +578,7 @@ public class ActivityStack {
 
     private void synchronizeTasks() {
         List<ActivityManager.RecentTaskInfo> recentTasks = mAms.getRecentTasks(100, 0);
+        List<ActivityManager.AppTask> appTasks = mAms.getAppTasks();
         Map<Integer, TaskRecord> newTacks = new LinkedHashMap<>();
         for (int i = recentTasks.size() - 1; i >= 0; i--) {
             ActivityManager.RecentTaskInfo next = recentTasks.get(i);

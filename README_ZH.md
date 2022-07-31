@@ -119,6 +119,8 @@
 * vlc应用启动崩溃，96bd784版本正常启动
 * 火狐浏览器点击输入网址崩溃
 * 调用content provider的getType崩溃
+* 静态广播测试失败
+* 多进程缺陷，初步怀疑新进程启动后，Activity中的原活动对应的pid未更新，导致出现新活动对应多进程。卡顿是由于初始化新进程导致的
 
 ## 感谢
 - [VirtualApp](https://github.com/asLody/VirtualApp)

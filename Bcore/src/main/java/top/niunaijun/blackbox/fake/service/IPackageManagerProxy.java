@@ -40,7 +40,7 @@ import top.niunaijun.blackbox.utils.compat.ParceledListSliceCompat;
  * 此处无Bug
  */
 public class IPackageManagerProxy extends BinderInvocationStub {
-    public static final String TAG = "PackageManagerStub";
+    public static final String TAG = "PackageManagerProxy";
 
     public IPackageManagerProxy() {
         super(BRActivityThread.get().sPackageManager().asBinder());

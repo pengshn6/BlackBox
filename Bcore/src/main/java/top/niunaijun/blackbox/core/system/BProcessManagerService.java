@@ -148,14 +148,14 @@ public class BProcessManagerService implements ISystemService {
 
     public void restartAppProcess(String packageName, String processName, int userId) {
         synchronized (mProcessLock) {
-            int callingUid = Binder.getCallingUid();
             int callingPid = Binder.getCallingPid();
-            ProcessRecord app = findProcessByPid(callingPid);;
-            if (app == null) {
-                String stubProcessName = getProcessName(BlackBoxCore.getContext(), callingPid);
-                int bpid = parseBPid(stubProcessName);
-                startProcessLocked(packageName, processName, userId, bpid, callingPid);
+            ProcessRecord app = findProcessByPid(callingPid);
+            if (app != null) {
+                killProcess(app);
             }
+            String stubProcessName = getProcessName(BlackBoxCore.getContext(), callingPid);
+            int bpid = parseBPid(stubProcessName);
+            startProcessLocked(packageName, processName, userId, bpid, callingPid);
         }
     }
 

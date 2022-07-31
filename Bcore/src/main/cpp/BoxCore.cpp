@@ -73,7 +73,10 @@ void nativeHook(JNIEnv *env) {
     BaseHook::init(env);
     UnixFileSystemHook::init(env);
     VMClassLoaderHook::init(env);
+
+    // SystemPropertiesHook会引起小米k40，安卓11上的抖音崩溃
     SystemPropertiesHook::init(env);
+
     RuntimeHook::init(env);
     BinderHook::init(env);
 }
@@ -111,7 +114,6 @@ void addWhiteList(JNIEnv *env, jclass clazz, jstring path) {
 }
 
 void enableIO(JNIEnv *env, jclass clazz) {
-//    SystemPropertiesHook::init(env);
     IO::init(env);
     nativeHook(env);
 }
