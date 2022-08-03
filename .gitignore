@@ -86,3 +86,6 @@ lint/tmp/
 
 # mac
 *.DS_Store
+
+app/BlackBox32/
+app/BlackBox64/

@@ -10,6 +10,9 @@
 
 黑盒BlackBox，是一款虚拟引擎，可以在Android上克隆、运行虚拟应用，拥有免安装运行能力。黑盒可以掌控被运行的虚拟应用，做任何想做的事情。
 
+## 交流
+[Telegram](https://t.me/blackboxing)
+
 ## 支持
 暂不考虑4x，目前已兼容 5.0 ～ 12.0并跟进后续新系统。
 
@@ -121,6 +124,12 @@
 * 调用content provider的getType崩溃
 * 静态广播测试失败
 * 多进程缺陷，初步怀疑新进程启动后，Activity中的原活动对应的pid未更新，导致出现新活动对应多进程。卡顿是由于初始化新进程导致的
+
+## 赞助
+本项目为免费开源项目，日常维护耗费大量精力。如想加快进度或请作者喝杯咖啡。
+
+- BTC: 1HhctWiQ6dBQomKPJjty3P1wL9CuK9eCqM
+- USDT（ERC20）: 0x408336bcaef0c5eb11772024a06079ab2e14e6cd
 
 ## 感谢
 - [VirtualApp](https://github.com/asLody/VirtualApp)
