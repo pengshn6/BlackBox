@@ -132,8 +132,8 @@ void IO::init(JNIEnv *env) {
     jclass tmpFile = env->FindClass("java/io/File");
     getAbsolutePathMethodId = env->GetMethodID(tmpFile, "getAbsolutePath", "()Ljava/lang/String;");
 //    shadowhook_hook_sym_name("libc.so", "open", (void *) shared_proxy_read, NULL);
-    SHADOWHOOK_STACK_SCOPE();
-    shadowhook_hook_sym_name("libc.so", "openat", (void *) new_openat, (void **)&orig_openat);
-    shadowhook_hook_sym_name("libc.so", "popen", (void *) new_popen, (void **)&orig_popen);
+    //SHADOWHOOK_STACK_SCOPE();
+    //shadowhook_hook_sym_name("libc.so", "openat", (void *) new_openat, (void **)&orig_openat);
+    //shadowhook_hook_sym_name("libc.so", "popen", (void *) new_popen, (void **)&orig_popen);
 }
 
